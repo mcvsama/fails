@@ -23,7 +23,7 @@ class Controller
 		assert (Fails::$router !== null);
 		assert (Fails::$dispatcher->current_route !== null);
 
-		$this->params = array_merge (Fails::$dispatcher->current_route->get_params(), Fails::$request->g, Fails::$request->p);
+		$this->params = &Fails::$dispatcher->merged_params;
 		$this->set = new stdclass();
 
 		$this->dispatcher	= Fails::$dispatcher;

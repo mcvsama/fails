@@ -15,6 +15,9 @@ class Dispatcher
 	# Current route got from Router:
 	public $current_route;
 
+	# Merged parameters from POST, GET and Route:
+	public $merged_params;
+
 	/**
 	 * Ctor
 	 */
@@ -106,9 +109,9 @@ class Dispatcher
 		$this->current_route = $this->router->get_route_for ($this->request->route_string());
 
 		# Controller/action names:
-		$c = $this->current_route->get_params();
-		$this->controller_name = $c['controller'];
-		$this->action_name = $c['action'];
+		$this->merged_params = array_merge ($this->current_route->get_params(), $this->request->g, $this->request->p);
+		$this->controller_name = $this->merged_params['controller'];
+		$this->action_name = $this->merged_params['action'];
 
 		# View:
 		Fails::$view = $this->view = new View();
