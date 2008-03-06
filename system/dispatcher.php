@@ -186,6 +186,9 @@ class Dispatcher
 		# After-filter:
 		if (method_exists ($this->controller, 'after_filter'))
 			return $this->controller->after_filter();
+
+		# Echo rendered result: TODO run Response->respond() or similar.
+		echo $this->view->content_for_layout();
 	}
 
 	/**

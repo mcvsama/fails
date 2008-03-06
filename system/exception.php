@@ -1,6 +1,19 @@
 <?php # vim: set fenc=utf8 ts=4 sw=4:
 
 ##
+## General exceptions
+##
+
+class MethodMissingException extends Exception
+{
+	public function __construct ($name, $object)
+	{
+		parent::__construct ("missing method '$name' on object '".get_class ($object)."'");
+	}
+}
+
+
+##
 ## Dispatcher exceptions
 ##
 

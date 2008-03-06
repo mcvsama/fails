@@ -24,6 +24,29 @@
   <defs
      id="defs4">
     <linearGradient
+       id="linearGradient2200"
+       inkscape:collect="always">
+      <stop
+         id="stop2202"
+         offset="0"
+         style="stop-color:#2ca05a;stop-opacity:1" />
+      <stop
+         id="stop2204"
+         offset="1"
+         style="stop-color:#2ca05a;stop-opacity:0" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient2194">
+      <stop
+         id="stop2196"
+         offset="0"
+         style="stop-color:#002255;stop-opacity:0.9909091" />
+      <stop
+         id="stop2198"
+         offset="1"
+         style="stop-color:#003380;stop-opacity:0" />
+    </linearGradient>
+    <linearGradient
        inkscape:collect="always"
        id="linearGradient5130">
       <stop
@@ -77,7 +100,7 @@
        gradientUnits="userSpaceOnUse" />
     <linearGradient
        inkscape:collect="always"
-       xlink:href="#linearGradient5130"
+       xlink:href="#linearGradient2200"
        id="linearGradient6113"
        gradientUnits="userSpaceOnUse"
        x1="429.29663"
@@ -93,6 +116,16 @@
        y1="-338.14871"
        x2="251.42949"
        y2="-361.36838" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient2194"
+       id="linearGradient2190"
+       gradientUnits="userSpaceOnUse"
+       x1="251.42949"
+       y1="-338.14871"
+       x2="251.42949"
+       y2="-361.36838"
+       gradientTransform="matrix(0.8712531,0,0,0.8712531,30.445894,-44.290711)" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -101,9 +134,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:cx="169.39961"
-     inkscape:cy="74.866648"
-     inkscape:zoom="1.8215843"
+     inkscape:cx="132.36461"
+     inkscape:cy="47.370581"
+     inkscape:zoom="3.6431686"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      inkscape:window-width="1016"
@@ -128,34 +161,30 @@
      inkscape:label="Warstwa 1"
      id="layer1"
      transform="translate(-183.53152,-301.37402)">
-    <g
-       id="g5120"
-       transform="matrix(0.8712531,0,0,0.8712531,30.445894,44.290711)">
-      <text
-         xml:space="preserve"
-         style="font-size:59.63323975px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#800000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:PLRoman12"
-         x="181.26546"
-         y="342.81912"
-         id="text2164"
-         sodipodi:linespacing="100%"><tspan
-           sodipodi:role="line"
-           id="tspan2166"
-           x="181.26546"
-           y="342.81912">Fails</tspan></text>
-      <text
-         transform="scale(1,-1)"
-         sodipodi:linespacing="100%"
-         id="use2172"
-         y="-345.20825"
-         x="181.26546"
-         style="font-size:59.63323975px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;opacity:0.1205357;fill:url(#linearGradient6133);fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:PLRoman12"
-         xml:space="preserve"><tspan
-           style="fill:url(#linearGradient6133);fill-opacity:1"
-           y="-345.20825"
-           x="181.26546"
-           id="tspan4137"
-           sodipodi:role="line">Fails</tspan></text>
-    </g>
+    <text
+       sodipodi:linespacing="100%"
+       id="text2164"
+       y="342.97293"
+       x="188.37399"
+       style="font-size:51.95564651px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#003380;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:PLRoman12"
+       xml:space="preserve"><tspan
+         y="342.97293"
+         x="188.37399"
+         id="tspan2166"
+         sodipodi:role="line">Fails</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:51.95564651px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;opacity:0.1205357;fill:url(#linearGradient2190);fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:PLRoman12"
+       x="188.37399"
+       y="-345.05447"
+       id="use2172"
+       sodipodi:linespacing="100%"
+       transform="scale(1,-1)"><tspan
+         sodipodi:role="line"
+         id="tspan4137"
+         x="188.37399"
+         y="-345.05447"
+         style="fill:url(#linearGradient2190);fill-opacity:1">Fails</tspan></text>
     <g
        id="g6107"
        transform="matrix(0.8712531,0,0,0.8712531,-68.082694,66.770535)">
@@ -163,7 +192,7 @@
          id="text5116"
          y="335.77765"
          x="357.90408"
-         style="font-size:22px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;writing-mode:lr-tb;text-anchor:start;fill:#d45500;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Calibri"
+         style="font-size:22px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;writing-mode:lr-tb;text-anchor:start;fill:#2ca05a;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Calibri"
          xml:space="preserve"><tspan
            y="335.77765"
            x="357.90408"

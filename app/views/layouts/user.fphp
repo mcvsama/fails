@@ -1,0 +1,2 @@
+<h1>Layout dla strony</h1>
+<?= $this->content_for_action() ?>

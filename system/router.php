@@ -111,7 +111,7 @@ class Router implements DynamicMethod
 	{
 		if (preg_match ('/^(.+)_url$/', $method, $out))
 			return $this->generate_url ($out[1], coalesce (@$params[0], array()));
-		return null;
+		throw new MethodMissingException ($method, $this);
 	}
 
 	##

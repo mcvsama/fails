@@ -1,6 +1,6 @@
 <?php # vim: set fenc=utf8 ts=4 sw=4:
 
-class FailsViewerFactory implements ViewProcessorFactory
+class FailsViewerFactory extends ViewProcessorFactory
 {
 	public function extension()
 	{
@@ -16,7 +16,7 @@ class FailsViewerFactory implements ViewProcessorFactory
 
 # TODO Niech wyjątki przyjmują obiekt View, który wywołał był błąd.
 # TODO Podobnie zrób z innymi wyjątkami, np. dla Routera i innych.
-class FailsViewer
+class FailsViewer extends ViewProcessor
 {
 	# Template contents and variable bindings:
 	protected $contents;
@@ -92,6 +92,14 @@ class FailsViewer
 
 		# End output buffering:
 		return $this->result = ob_get_clean();
+	}
+
+	/**
+	 * Pass unhandled calls to View object.
+	 */
+	private function __call ($name, $arguments)
+	{
+		return call_user_func_array (array (&Fails::$view, $name), $arguments);
 	}
 }
 
