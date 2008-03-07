@@ -1,6 +1,6 @@
 <?php # vim: set fenc=utf8 ts=4 sw=4:
 
-class Router implements DynamicMethod
+class Router implements DynamicMethod, CallCatcher
 {
 	# List of routes:
 	private $routes;
@@ -255,7 +255,7 @@ class Route
 		$missing_parameters = array();
 		$used_parameters = array();
 		$p = array_merge ($this->params, $params);
-		$s = Fails::$request->base_url();
+		$s = rtrim (Fails::$request->base_url(), '/');
 		foreach ($this->segments as $seg)
 		{
 			if ($seg->type == 'string')

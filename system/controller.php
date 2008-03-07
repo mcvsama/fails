@@ -1,6 +1,6 @@
 <?php # vim: set fenc=utf8 ts=4 sw=4:
 
-class Controller
+class Controller implements CallCatcher
 {
 	public $controller;
 	public $dispatcher;

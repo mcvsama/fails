@@ -1,3 +1,4 @@
+interfaces/call_catcher
 interfaces/dynamic_method
 controller
 dispatcher

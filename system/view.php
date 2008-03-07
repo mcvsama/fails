@@ -1,6 +1,6 @@
 <?php # vim: set fenc=utf8 ts=4 sw=4:
 
-class View implements DynamicMethod
+class View implements DynamicMethod, CallCatcher
 {
 	# Factories creating ViewProcessors:
 	private $factories;
@@ -179,7 +179,7 @@ abstract class ViewProcessorFactory
 }
 
 
-abstract class ViewProcessor
+abstract class ViewProcessor implements CallCatcher
 {
 	/**
 	 * Processes template and returns result as string.
