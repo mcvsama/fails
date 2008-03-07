@@ -1,6 +1,6 @@
 <?php # vim: set fenc=utf8 ts=4 sw=4:
 
-class View
+class View implements DynamicMethod
 {
 	# Factories creating ViewProcessors:
 	private $factories;
@@ -134,18 +134,28 @@ class View
 		return $this->get_factory()->instantiate ($content, $variables);
 	}
 
-	/**
-	 * Function available to view template (template will be executed in context of this object).
-	 */
-	private function __call ($name, $arguments)
+	##
+	## Interface DynamicMethod
+	##
+
+	public function can_call ($name, $arguments)
+	{
+		return preg_match ('/^content_for_(.+)$/', $name, $out);
+	}
+
+	public function call ($name, $arguments)
 	{
 		if (preg_match ('/^content_for_(.+)$/', $name, $out))
-		{
-			$id = $out[1];
-			return @$this->content_for[$id];
-		}
-		else
-			throw new MethodMissingException ($name, $this);
+			return @$this->content_for[$out[1]];
+		throw new MethodMissingException ($name, $this);
+	}
+
+	/**
+	 * Call catcher.
+	 */
+	public function __call ($name, $arguments)
+	{
+		return Fails::$dispatcher->catch_call ($name, $arguments);
 	}
 }
 
@@ -208,6 +218,14 @@ abstract class ViewProcessor
 	public function render_json ($object, $status = null)
 	{
 		return Fails::$view->render_json ($object, $status);
+	}
+
+	/**
+	 * Call catcher.
+	 */
+	public function __call ($name, $arguments)
+	{
+		return Fails::$dispatcher->catch_call ($name, $arguments);
 	}
 }
 

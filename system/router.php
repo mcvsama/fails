@@ -103,26 +103,30 @@ class Router implements DynamicMethod
 		return $this->routes_by_name[$name]->generate_url ($params);
 	}
 
-	/**
-	 * Catches calls to non-existing methods and
-	 * calls generate_url if method name ends with '_url'.
-	 */
-	public function __call ($method, $params)
-	{
-		if (preg_match ('/^(.+)_url$/', $method, $out))
-			return $this->generate_url ($out[1], coalesce (@$params[0], array()));
-		throw new MethodMissingException ($method, $this);
-	}
-
 	##
 	## Interface DynamicMethod
 	##
 
-	public function dynamic_method ($name, $params)
+	public function can_call ($name, $arguments)
 	{
 		if (preg_match ('/^(.+)_url$/', $name, $out))
 			return isset ($this->routes_by_name[$out[1]]);
 		return false;
+	}
+
+	public function call ($method, $arguments)
+	{
+		if (preg_match ('/^(.+)_url$/', $method, $out))
+			return $this->generate_url ($out[1], coalesce (@$arguments[0], array()));
+		throw new MethodMissingException ($method, $this);
+	}
+
+	/**
+	 * Call catcher.
+	 */
+	public function __call ($name, $arguments)
+	{
+		return Fails::$dispatcher->catch_call ($name, $arguments);
 	}
 }
 

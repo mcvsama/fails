@@ -5,7 +5,11 @@ interface DynamicMethod
 	/**
 	 * \returns	true if method can be called.
 	 */
-	public function dynamic_method ($name, $params);
+	public function can_call ($name, $arguments);
+
+	/**
+	 */
+	public function call ($name, $arguments);
 }
 
 ?>

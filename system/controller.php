@@ -46,6 +46,14 @@ class Controller
 			$ary[$k] = $v;
 		return $ary;
 	}
+
+	/**
+	 * Call catcher.
+	 */
+	public function __call ($name, $arguments)
+	{
+		return Fails::$dispatcher->catch_call ($name, $arguments);
+	}
 }
 
 ?>

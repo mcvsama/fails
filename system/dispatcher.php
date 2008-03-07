@@ -38,6 +38,21 @@ class Dispatcher
 		$this->require_file (FAILS_ROOT.'/lib/'.$name.'/'.$name.'.php');
 	}
 
+	/**
+	 * Dispatches uncaught call to proper object, if possible.
+	 */
+	public function catch_call ($name, $arguments)
+	{
+		# Router:
+		if (Fails::$router->can_call ($name, $arguments))
+			return Fails::$router->call ($name, $arguments);
+		# View:
+		else if (Fails::$view->can_call ($name, $arguments))
+			return Fails::$view->call ($name, $arguments);
+
+		throw new MethodMissingException ($name, $this);
+	}
+
 	##
 	## Privates
 	##

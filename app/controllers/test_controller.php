@@ -11,8 +11,6 @@ class TestController extends Controller
 		# Lub jako parametr $this->render ('name', …, Response::TYPE_XHTML).
 		# Dlatego trza uważać, ale można to wyłączyć: $this->auto_set_mime = false; czy coś podobnego
 		$this->response->set_header ('Content-Type', 'text/html; charset=UTF-8');
-		var_dump ($this->router->user_show_url (array ('user_id' => 33)));
-		var_dump ($this->router->index_url (array ('x' => 12)));
 		$this->view->render_action ('test');
 	}
 }

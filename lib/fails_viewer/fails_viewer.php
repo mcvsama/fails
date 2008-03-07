@@ -93,14 +93,6 @@ class FailsViewer extends ViewProcessor
 		# End output buffering:
 		return $this->result = ob_get_clean();
 	}
-
-	/**
-	 * Pass unhandled calls to View object.
-	 */
-	private function __call ($name, $arguments)
-	{
-		return call_user_func_array (array (&Fails::$view, $name), $arguments);
-	}
 }
 
 
