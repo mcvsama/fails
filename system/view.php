@@ -8,6 +8,9 @@ class View implements DynamicMethod, CallCatcher
 	# Map of named blocks of views:
 	private $content_for;
 
+	# Identifier of engine to use:
+	private $current_factory;
+
 	/**
 	 * Ctor
 	 */
@@ -15,19 +18,40 @@ class View implements DynamicMethod, CallCatcher
 	{
 		$this->factories = array();
 		$this->content_for = array();
+		$this->current_factory = null;
 	}
 
 	/**
 	 * Registers new ViewProcessorFactory.
+	 * This function is intended to use only by templating engines
+	 * for registering themselves in Fails.
 	 *
 	 * \throws	ViewEngineAlreadyRegisteredException
-	 * 			If engine for given template extension is already registered.
+	 * 			If engine with same identifier is already registered.
 	 */
 	public function register_factory (ViewProcessorFactory $factory)
 	{
-		if (isset ($this->factories[$factory->extension()]))
+		if (isset ($this->factories[$factory->identifier()]))
 			throw new ViewEngineAlreadyRegisteredException ($factory);
-		$this->factories[$factory->extension()] = $factory;
+		$this->factories[$factory->identifier()] = $factory;
+	}
+
+	/**
+	 * Sets current templating engine to use.
+	 * If only one templating engine is loaded, there is no need to call this
+	 * function.
+	 *
+	 * \param	identifier
+	 * 			View engine identifier.
+	 *
+	 * \throws	MissingTemplatingEngineException
+	 * 			When selected templating engine haven't been loaded/registered.
+	 */
+	public function use_engine ($identifier)
+	{
+		if (!isset ($this->factories[$identifier]))
+			throw new MissingTemplatingEngineException ($identifier);
+		$this->current_factory = $this->factories[$identifier];
 	}
 
 	/**
@@ -40,6 +64,9 @@ class View implements DynamicMethod, CallCatcher
 	 * \param	status
 	 * 			Response status string or integer. If null, default is applied (depends on Response object,
 	 * 			mostly it will be "200 OK" or for example "304 Not Modified", etc.).
+	 *
+	 * \throws	MissingViewException
+	 * 			When given template file can't be found or loaded.
 	 */
 	public function render_action ($action, $layout = null, $status = null)
 	{
@@ -53,18 +80,25 @@ class View implements DynamicMethod, CallCatcher
 	 * 			Template name (without extension) relative to templates root directory.
 	 *
 	 * Other parameters as in render_action().
+	 *
+	 * \throws	MissingViewException
+	 * 			When given template file can't be found or loaded.
 	 */
 	public function render_template ($template_name, $layout = null, $status = null)
 	{
-		# Load template by extension: TODO
-		$type = ''; # '.html', '.xml', '.json', '.text', etc
 		$factory = $this->get_factory();
-		$file_name = FAILS_ROOT.'/app/views/'.$template_name.$type.'.'.$factory->extension();
+		$file_name = FAILS_ROOT.'/app/views/'.$template_name.'.'.$factory->extension();
 		return $this->render_file ($file_name, $layout, $status);
 	}
 
 	/**
-	 * TODO opis
+	 * \param	file_name
+	 * 			Absolute template file name with extension.
+	 *
+	 * Other parameters as in render_action().
+	 *
+	 * \throws	MissingViewException
+	 * 			When given template file can't be found or loaded.
 	 */
 	public function render_file ($file_name, $layout = false, $status = null)
 	{
@@ -111,17 +145,35 @@ class View implements DynamicMethod, CallCatcher
 	/**
 	 * Prevents setting rendered output as response content.
 	 */
-	public function dont_render()
+	public function prevent_rendering_as_response()
 	{
 		# TODO
 	}
 
+	##
+	## Privates
+	##
+
 	/**
 	 * Returns appropriate processor factory object to use.
+	 *
+	 * \throws	ViewConfigurationException
+	 * 			When there is more than one templating engine registered
+	 * 			and no one has been seleted with use_engine() method.
 	 */
 	private function get_factory()
 	{
-		return $this->factories['fphp'];
+		if ($this->current_factory === null)
+		{
+			if (count ($this->factories) == 1)
+			{
+				$z = array_values ($this->factories);
+				return $this->current_factory = $z[0];
+			}
+			else
+				throw new ViewConfigurationException ('no templating engine has been loaded');
+		}
+		return $this->current_factory;
 	}
 
 	/**
@@ -163,7 +215,12 @@ class View implements DynamicMethod, CallCatcher
 abstract class ViewProcessorFactory
 {
 	/**
-	 * Returns recognized template extension.
+	 * Returns engine identifier.
+	 */
+	abstract public function identifier();
+
+	/**
+	 * Returns template files extension.
 	 */
 	abstract public function extension();
 

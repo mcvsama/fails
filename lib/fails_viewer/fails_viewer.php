@@ -2,6 +2,11 @@
 
 class FailsViewerFactory extends ViewProcessorFactory
 {
+	public function identifier()
+	{
+		return 'fphp';
+	}
+
 	public function extension()
 	{
 		return 'fphp';

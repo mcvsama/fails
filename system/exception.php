@@ -100,9 +100,26 @@ class ViewEngineAlreadyRegisteredException extends Exception
 
 	public function __construct (ViewProcessorFactory $processor)
 	{
-		parent::__construct ("view engine '{$processor->extension()}' already registered");
+		parent::__construct ("view engine '{$processor->identifier()}' already registered");
 		$this->processor = $processor;
 	}
+}
+
+
+class MissingViewEngineException extends Exception
+{
+	public $identifier;
+
+	public function __construct ($identifier)
+	{
+		parent::__construct ("view engine identifier by '{$identifier}' not registered");
+		$this->identifier = $identifier;
+	}
+}
+
+
+class ViewConfigurationException extends Exception
+{
 }
 
 ?>
