@@ -43,6 +43,8 @@ abstract class DatabaseDriver
 	 * 			If engine supports parameter bindings in queries it may use
 	 * 			it to execute query. Otherwise it may apply sqlize() method on
 	 * 			each parameter to create SQL string and execute it.
+	 *
+	 * \returns	DatabaseResult object.
 	 */
 	abstract public function exec ($query);
 
@@ -78,13 +80,6 @@ abstract class DatabaseDriver
 	 * \returns	escaped string.
 	 */
 	abstract public function escape_relation_name ($string);
-
-	/**
-	 * Executes query.
-	 *
-	 * \returns	DatabaseResult object.
-	 */
-	abstract public function exec (DatabaseQuery $query);
 
 	/**
 	 * Returns relation info.

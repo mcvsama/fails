@@ -1,6 +1,6 @@
 <?php # vim: set fenc=utf8 ts=4 sw=4:
 
-class FailsViewerFactory extends ViewProcessorFactory
+class FailsViewerFactory extends ViewerFactory
 {
 	public function identifier()
 	{
@@ -21,7 +21,7 @@ class FailsViewerFactory extends ViewProcessorFactory
 
 # TODO Niech wyjątki przyjmują obiekt View, który wywołał był błąd.
 # TODO Podobnie zrób z innymi wyjątkami, np. dla Routera i innych.
-class FailsViewer extends ViewProcessor
+class FailsViewer extends Viewer
 {
 	# Template contents and variable bindings:
 	protected $contents;
@@ -101,6 +101,6 @@ class FailsViewer extends ViewProcessor
 }
 
 
-Fails::$view->register_factory (new FailsViewerFactory());
+Fails::$controller->register_factory (new FailsViewerFactory());
 
 ?>

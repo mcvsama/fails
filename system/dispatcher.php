@@ -46,9 +46,9 @@ class Dispatcher
 		# Router:
 		if (Fails::$router->can_call ($name, $arguments))
 			return Fails::$router->call ($name, $arguments);
-		# View:
-		else if (Fails::$view->can_call ($name, $arguments))
-			return Fails::$view->call ($name, $arguments);
+		# Controller:
+		else if (Fails::$controller->can_call ($name, $arguments))
+			return Fails::$controller->call ($name, $arguments);
 
 		throw new MethodMissingException ($name, $this);
 	}
@@ -128,9 +128,6 @@ class Dispatcher
 		$this->controller_name = $this->merged_params['controller'];
 		$this->action_name = $this->merged_params['action'];
 
-		# View:
-		Fails::$view = $this->view = new View();
-
 		# Load controller file:
 		Fails::$controller = $this->controller = $this->load_controller();
 	}
@@ -203,7 +200,7 @@ class Dispatcher
 			return $this->controller->after_filter();
 
 		# Echo rendered result: TODO run Response->respond() or similar.
-		echo $this->view->content_for_layout();
+		echo $this->controller->content_for_layout();
 	}
 
 	/**

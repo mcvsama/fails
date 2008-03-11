@@ -63,7 +63,7 @@ class DatabaseQuery
 	/**
 	 * Validation helper.
 	 */
-	private function ...
+	//private function ...
 }
 
 ?>
