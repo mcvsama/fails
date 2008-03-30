@@ -150,6 +150,11 @@ class Dispatcher
 		# Throw exception if $controller_name pointed out of controllers directory:
 		if (strpos ($f, $b) !== 0)
 			throw new MissingControllerException ("invalid controller name '{$this->controller_name}'");
+		# ApplicationController, Helper, Model, Presenter:
+		$this->require_file (FAILS_ROOT.'/app/models/application_model.php');
+		$this->require_file (FAILS_ROOT.'/app/helpers/application_helper.php');
+		$this->require_file (FAILS_ROOT.'/app/controllers/application_controller.php');
+		$this->require_file (FAILS_ROOT.'/app/presenters/application_presenter.php');
 		# Load file if everything seems OK:
 		$this->require_file ($f);
 		# Controller:

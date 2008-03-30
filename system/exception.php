@@ -12,7 +12,6 @@ class MethodMissingException extends Exception
 	}
 }
 
-
 ##
 ## Dispatcher exceptions
 ##

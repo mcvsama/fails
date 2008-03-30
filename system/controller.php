@@ -51,6 +51,17 @@ class Controller implements DynamicMethod, CallCatcher
 	}
 
 	/**
+	 * Returns an array of parameter values.
+	 */
+	public function params()
+	{
+		$r = array();
+		foreach (func_get_args() as $name)
+			$r[] = $this->params[$name];
+		return $r;
+	}
+
+	/**
 	 * Registers new ViewerFactory.
 	 * This function is intended to use only by templating engines
 	 * for registering themselves in Fails.
@@ -58,7 +69,7 @@ class Controller implements DynamicMethod, CallCatcher
 	 * \throws	ViewEngineAlreadyRegisteredException
 	 * 			If engine with same identifier is already registered.
 	 */
-	public function register_factory (ViewerFactory $factory)
+	public function register_viewer_factory (ViewerFactory $factory)
 	{
 		if (isset ($this->factories[$factory->identifier()]))
 			throw new ViewEngineAlreadyRegisteredException ($factory);
@@ -76,7 +87,7 @@ class Controller implements DynamicMethod, CallCatcher
 	 * \throws	MissingTemplatingEngineException
 	 * 			When selected templating engine haven't been loaded/registered.
 	 */
-	public function use_engine ($identifier)
+	public function use_viewer_engine ($identifier)
 	{
 		if (!isset ($this->factories[$identifier]))
 			throw new MissingTemplatingEngineException ($identifier);
@@ -86,7 +97,7 @@ class Controller implements DynamicMethod, CallCatcher
 	/**
 	 * Returns map of variables meant to be passed to view.
 	 */
-	public function get_variables_for_view()
+	protected function get_variables_for_view()
 	{
 		$ary = array();
 		foreach (get_object_vars ($this->set) as $k => $v)
@@ -108,7 +119,7 @@ class Controller implements DynamicMethod, CallCatcher
 	 * \throws	MissingViewException
 	 * 			When given template file can't be found or loaded.
 	 */
-	public function render_action ($action, $layout = null, $status = null)
+	protected function render_action ($action, $layout = null, $status = null)
 	{
 		return $this->render_template (Fails::$dispatcher->controller_name.'/'.$action, $layout, $status);
 	}
@@ -124,9 +135,9 @@ class Controller implements DynamicMethod, CallCatcher
 	 * \throws	MissingViewException
 	 * 			When given template file can't be found or loaded.
 	 */
-	public function render_template ($template_name, $layout = null, $status = null)
+	protected function render_template ($template_name, $layout = null, $status = null)
 	{
-		$factory = $this->get_factory();
+		$factory = $this->get_viewer_factory();
 		$file_name = FAILS_ROOT.'/app/views/'.$template_name.'.'.$factory->extension();
 		return $this->render_file ($file_name, $layout, $status);
 	}
@@ -140,7 +151,7 @@ class Controller implements DynamicMethod, CallCatcher
 	 * \throws	MissingViewException
 	 * 			When given template file can't be found or loaded.
 	 */
-	public function render_file ($file_name, $layout = false, $status = null)
+	protected function render_file ($file_name, $layout = false, $status = null)
 	{
 		# Load template file:
 		$content = @file_get_contents ($file_name);
@@ -153,7 +164,7 @@ class Controller implements DynamicMethod, CallCatcher
 	/**
 	 * TODO opis
 	 */
-	public function render_text ($text, $layout = null, $status = null)
+	protected function render_text ($text, $layout = null, $status = null)
 	{
 		# TODO przekazywać wynik do response
 		if ($layout === false)
@@ -168,7 +179,7 @@ class Controller implements DynamicMethod, CallCatcher
 	/**
 	 * TODO opis
 	 */
-	public function render_json ($object, $status = null)
+	protected function render_json ($object, $status = null)
 	{
 		# TODO Use json::encode()/decode from infopedia/php-framework
 	}
@@ -176,7 +187,7 @@ class Controller implements DynamicMethod, CallCatcher
 	/**
 	 * Prevents setting rendered output as response content.
 	 */
-	public function render_nothing()
+	protected function render_nothing()
 	{
 		# TODO
 	}
@@ -206,9 +217,9 @@ class Controller implements DynamicMethod, CallCatcher
 	 *
 	 * \throws	ViewConfigurationException
 	 * 			When there is more than one templating engine registered
-	 * 			and no one has been seleted with use_engine() method.
+	 * 			and no one has been seleted with use_viewer_engine() method.
 	 */
-	private function get_factory()
+	private function get_viewer_factory()
 	{
 		if ($this->current_factory === null)
 		{
@@ -230,12 +241,13 @@ class Controller implements DynamicMethod, CallCatcher
 	{
 		# TODO jeśli jest tylko jeden silnik, wybierz go. W przeciwnym razie rządaj określenia przez
 		# kontroler jakiego silnika używać.
-		return $this->get_factory()->instantiate ($content, $variables);
+		return $this->get_viewer_factory()->instantiate ($content, $variables);
 	}
 
-	/**
-	 * Call catcher.
-	 */
+	##
+	## Interface CallCatcher
+	##
+
 	public function __call ($name, $arguments)
 	{
 		return Fails::$dispatcher->catch_call ($name, $arguments);

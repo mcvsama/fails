@@ -7,35 +7,6 @@ abstract class Viewer implements CallCatcher
 	 */
 	abstract public function process();
 
-	##
-	## Short-links to View's methods.
-	##
-
-	public function render_action ($action, $layout = null, $status = null)
-	{
-		return Fails::$controller->render_action ($action, $layout, $status);
-	}
-
-	public function render_template ($template_name, $layout = null, $status = null)
-	{
-		return Fails::$controller->render_template ($template_name, $layout, $status);
-	}
-
-	public function render_file ($file_name, $layout = false, $status = null)
-	{
-		return Fails::$controller->render_file ($file_name, $layout, $status);
-	}
-
-	public function render_text ($text, $layout = null, $status = null)
-	{
-		return Fails::$controller->render_text ($text, $layout, $status);
-	}
-
-	public function render_json ($object, $status = null)
-	{
-		return Fails::$controller->render_json ($object, $status);
-	}
-
 	/**
 	 * TODO opis
 	 * To be called only from within a view.
@@ -45,9 +16,10 @@ abstract class Viewer implements CallCatcher
 		# TODO
 	}
 
-	/**
-	 * Call catcher.
-	 */
+	##
+	## Interface CallCatcher
+	##
+
 	public function __call ($name, $arguments)
 	{
 		return Fails::$dispatcher->catch_call ($name, $arguments);

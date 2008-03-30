@@ -47,23 +47,9 @@ class Request
 		return $this->base_url;
 	}
 
-	/**
-	 * Returns string describing current object's state.
-	 */
-	public function inspect()
-	{
-		foreach ($fc->post->get_params() as $k => $v)
-		{
-			$s .= "▫ $k >>> ";
-			ob_start();
-			var_dump ($v);
-			$x = ob_get_contents();
-			ob_end_clean();
-			$x = preg_replace ('/(\s+)/', ' ', $x);
-			$x = trim ($x);
-			$s .= "$x\n";
-		}
-	}
+	##
+	## Privates
+	##
 
 	/**
 	 */

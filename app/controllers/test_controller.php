@@ -1,6 +1,6 @@
-<?php
+<?php # vim: set fenc=utf8 ts=4 sw=4:
 
-class TestController extends Controller
+class TestController extends ApplicationController
 {
 	function _test_routes()
 	{
@@ -12,6 +12,7 @@ class TestController extends Controller
 		# Dlatego trza uważać, ale można to wyłączyć: $this->auto_set_mime = false; czy coś podobnego
 		$this->response->set_header ('Content-Type', 'text/html; charset=UTF-8');
 		$this->render_action ('test.xhtml');
+		list ($a, $b) = $this->params ('a', 'b', 'z');
 	}
 }
 
