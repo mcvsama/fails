@@ -37,7 +37,7 @@ class Response
 	/**
 	 * Sets HTTP status for response.
 	 */
-	public function set_status ($status_code, $message)
+	public function set_status ($status_code, $message = '')
 	{
 		$this->status = $status_code.' '.$message;
 	}
@@ -74,10 +74,16 @@ class Response
 	/**
 	 * \returns	fully-qualified redirection URL.
 	 */
-	public function fully_qalified_redirection_url()
+	public function fully_qualified_redirection_url()
 	{
 		$k = $this->redirection;
-		if ($k[0] == '/')
+		# If there is ':' in URL and it occurs before '?', it must be
+		# absolute URL:
+		$a = strpos ($this->redirection, ':');
+		if ($a !== false && $a < strpos ($this->redirection, '?'))
+			return $this->redirection;
+		# Otherwise, prepend base URL:
+		return Fails::$request->fully_qualified_base_url().$this->redirection;
 	}
 
 	/**
@@ -92,7 +98,7 @@ class Response
 			header ($header_name.': '.$content);
 		# Redirection:
 		if ($this->is_redirected())
-			header ('Location: '.$this->fully_qalified_redirection_url());
+			header ('Location: '.$this->fully_qualified_redirection_url());
 		# TODO set ETag and check if we should respons Not-Modified or respond with full body.
 		echo $this->content;
 	}

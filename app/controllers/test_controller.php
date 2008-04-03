@@ -13,6 +13,10 @@ class TestController extends ApplicationController
 		$this->response->set_header ('Content-Type', 'text/html; charset=UTF-8');
 		$this->render_action ('test.xhtml');
 		list ($a, $b) = $this->params ('a', 'b', 'z');
+
+		$a = new DatabaseQuery ('SELECT * FROM users WHERE username IN (:0)', array ('mcv', 'test'));
+		$d = new PostgreSQLDriver ('localhost', 'stoliki', 'stoliki', '');
+		$d->exec ($a);
 	}
 }
 

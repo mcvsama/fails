@@ -57,7 +57,7 @@ class Controller implements DynamicMethod, CallCatcher
 	{
 		$r = array();
 		foreach (func_get_args() as $name)
-			$r[] = $this->params[$name];
+			$r[] = @$this->params[$name];
 		return $r;
 	}
 

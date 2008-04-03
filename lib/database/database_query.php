@@ -9,32 +9,17 @@ class DatabaseQuery
 	 * Creates new Query.
 	 *
 	 * \param	sql
-	 * 			SQL to use.
-	 * \param	parameters
-	 * 			Parameter bindings.
-	 *
-	 * \example	new DatabaseQuery ("SELECT * FROM users WHERE id = :1", array ($user->id));
-	 */
-	public function __construct ($sql, array $parameters = array())
-	{
-		$this->sql = $sql;
-		$this->parameters = $parameters;
-		$this->validate();
-	}
-
-	/**
-	 * Creates new query.
-	 *
-	 * \param	sql
-	 * 			SQL string.
+	 * 			SQL command.
 	 * \param	…
 	 * 			Additional parameters are _the_ parameter bindings.
 	 *
-	 * \example	DatabaseQuery::create ("SELECT * FROM users WHERE id = :1", $user->id);
+	 * \example	new DatabaseQuery ("SELECT * FROM users WHERE id = :1", $user->id);
 	 */
-	public static function create ($sql)
+	public function __construct ($sql)
 	{
-		return new DatabaseQuery ($sql, array_slice (func_get_args(), 1));
+		$this->sql = $sql;
+		$this->parameters = array_slice (func_get_args(), 1);
+		$this->validate();
 	}
 
 	/**
@@ -52,18 +37,59 @@ class DatabaseQuery
 	}
 
 	/**
-	 * Quotes string to insert into SQL string that may contain
+	 * Escapes string to insert into SQL string that may contain
 	 * characters that otherwise would be interpreted as eg. parameter bindings.
 	 */
-	public function q ($str)
+	public function e ($string)
 	{
-		# TODO
+		return str_replace (':', '::', $string);
 	}
 
 	/**
-	 * Validation helper.
+	 * \returns	array containing 'sql' and 'parameters' in such order.
+	 * 			'sql' is the SQL to use, 'parameters' is an array of parameter values.
 	 */
-	//private function ...
+	public function create_bindings (Bind $callback)
+	{
+		list ($placeholders, $parameters) = $callback->call ($this->parameters);
+		$sql = preg_replace ('/(::)|:{(\w+)}|:(\w+)/e', '$this->bindings_replacer ($placeholders, \'$1\', \'$2\', \'$3\')', $this->sql);
+		return array ($sql, $parameters);
+	}
+
+	/**
+	 * Helper for create_bindings.
+	 */
+	private function bindings_replacer (&$placeholders, $colons, $a, $b)
+	{
+		if ($colons === '::')
+			return ':';
+		return $placeholders[$a? $a : $b];
+	}
+}
+
+
+/**
+ * DatabaseQueryWithArray
+ *
+ * Variation of DatabaseQuery with explicit bindings parameter
+ * in constructor.
+ */
+class DatabaseQueryWithArray extends DatabaseQuery
+{
+	/**
+	 * Creates new Query
+	 *
+	 * \param	sql
+	 * 			SQL command.
+	 * \param	parameters
+	 * 			Map/array of parameter bindings.
+	 *
+	 * \example	new DatabaseQueryWithArray ("SELECT * FROM users WHERE id = :1", array ($user->id));
+	 */
+	public function __construct ($sql, $parameters = array())
+	{
+		call_user_func_array (array (parent, '__construct'), array_merge (array ($sql), $parameters));
+	}
 }
 
 ?>

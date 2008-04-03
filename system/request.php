@@ -40,11 +40,35 @@ class Request
 	}
 
 	/**
-	 * Returns base-url for this Fails installation.
+	 * Returns base URL for this Fails installation.
 	 */
 	public function base_url()
 	{
 		return $this->base_url;
+	}
+
+	/**
+	 * Returns fully qualified base URL.
+	 */
+	public function fully_qualified_base_url()
+	{
+		return $this->protocol().$this->env['SERVER_NAME'].$this->base_url();
+	}
+
+	/**
+	 * Returns 'http://' or 'https://'.
+	 */
+	public function protocol()
+	{
+		return $this->scheme().'://';
+	}
+
+	/**
+	 * Returns 'http' or 'https'.
+	 */
+	public function scheme()
+	{
+		return (isset ($this->env['HTTPS']) && strtolower ($this->env['HTTPS']) == 'on')? 'https': 'http';
 	}
 
 	##

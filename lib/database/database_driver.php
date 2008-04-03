@@ -11,35 +11,23 @@ abstract class DatabaseDriver
 	# Transactions depth:
 	private $transaction_depth;
 
+	# Queries counter:
+	public $queries_count;
+
 	/**
 	 * Ctor
 	 */
 	public function __construct()
 	{
 		$this->transaction_depth = 0;
+		$this->queries_count = 0;
 	}
-
-	/**
-	 * Queries database in PostgreSQL-fashion. Arguments
-	 * in @query_string are referenced by :1, :2 or by :{1}, :{2},
-	 * or by :key1, :key2, :{key1}, :{key2}, ...
-	 * Throws argument_exception when no arguments are given
-	 * or when SQL statement is invalid or so.
-	 * Returns object of type dbms_result as a result of query
-	 * or null if there is no result.
-	 *
-	 * Examples:
-	 *  - query (query_string, arg1, arg2, ...);
-	 *  - query (query_string, array (arg1, arg2, ...));
-	 *  - query (query_string, array (arg1name => arg1value, ...));
-	 */
-	abstract public function query ($sql_query);
 
 	/**
 	 * Executes query.
 	 *
 	 * \param	query
-	 * 			Either DatabaseQuery object or SQL string.
+	 * 			DatabaseQuery object.
 	 * 			If engine supports parameter bindings in queries it may use
 	 * 			it to execute query. Otherwise it may apply sqlize() method on
 	 * 			each parameter to create SQL string and execute it.
@@ -47,21 +35,6 @@ abstract class DatabaseDriver
 	 * \returns	DatabaseResult object.
 	 */
 	abstract public function exec ($query);
-
-	/**
-	 * Escapes string.
-	 * Must be implemented in concrete driver.
-	 *
-	 * \returns	escaped string.
-	 */
-	abstract public function escape ($string);
-
-	/**
-	 * Unescapes string.
-	 *
-	 * \returns	unescaped string.
-	 */
-	abstract public function unescape ($string);
 
 	/**
 	 * Converts object to SQL string value:
@@ -72,19 +45,47 @@ abstract class DatabaseDriver
 	 *
 	 * \returns	SQL string.
 	 */
-	abstract public function sqlize ($object);
+	public function sqlize ($object)
+	{
+		switch (gettype ($object))
+		{
+			case 'boolean':
+				return $object ? 'TRUE' : 'FALSE';
+			case 'integer':
+			case 'double':
+				return "$object";
+			case 'string':
+				return "'".$this->escape ($object)."'";
+			case 'array':
+				$a = array();
+				foreach ($object as $v)
+					$a[] = $this->sqlize ($v);
+				return implode (', ', $a);
+			case 'NULL':
+				return 'NULL';
+			case 'object':
+			case 'resource':
+			case 'unknown type':
+				throw new UnsupportedTypeForSQLException ($object);
+		}
+	}
 
 	/**
-	 * Escapes relation name, that is puts it betwenn "" (PostgreSQL) or `` (MySQL).
+	 * Escapes relation name, that is: puts it betwenn "" (PostgreSQL) or `` (MySQL).
 	 *
 	 * \returns	escaped string.
 	 */
 	abstract public function escape_relation_name ($string);
 
 	/**
-	 * Returns relation info.
+	 * Returns list of relations.
 	 */
-	abstract public function dump_relation_info ($relation_name);
+	abstract public function dump_relations();
+
+	/**
+	 * Returns relation attributes.
+	 */
+	abstract public function dump_attributes_of ($relation_name);
 
 	/**
 	 * Starts new transaction.
@@ -126,6 +127,18 @@ abstract class DatabaseDriver
 		if ($this->transaction_depth == 0)
 			$this->query ('ROLLBACK');
 	}
+
+	##
+	## Protected
+	##
+
+	/**
+	 * Escapes string.
+	 * Must be implemented in concrete driver.
+	 *
+	 * \returns	escaped string.
+	 */
+	abstract protected function escape ($string);
 }
 
 ?>

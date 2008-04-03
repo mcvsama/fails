@@ -106,6 +106,9 @@ class Dispatcher
 
 		Fails::$dispatcher = $this;
 
+		# Environment:
+		$this->require_file (FAILS_ROOT.'/config/environment.inc');
+
 		# Logger:
 		Fails::$logger = $this->logger = new Logger (FAILS_ROOT.'/log/default');
 
@@ -204,8 +207,11 @@ class Dispatcher
 		if (method_exists ($this->controller, 'after_filter'))
 			return $this->controller->after_filter();
 
-		# Echo rendered result: TODO run Response->respond() or similar.
-		echo $this->controller->content_for_layout();
+		# Set content for response:
+		$this->response->set_content ($this->controller->content_for_layout());
+
+		# Echo rendered result:
+		$this->response->answer();
 	}
 
 	/**

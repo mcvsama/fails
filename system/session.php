@@ -11,9 +11,9 @@ class Session
 	{
 		session_start();
 		session_name (CONFIG_SESSION_ID);
-#		$this->vars = &$_SESSION;
+		$this->vars = &$_SESSION;
 
-#		unset ($_SESSION);
+		unset ($_SESSION);
 	}
 
 	/**
