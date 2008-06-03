@@ -1,5 +1,6 @@
 <?php # vim: set fenc=utf8 ts=4 sw=4:
 
+require 'exception.php';
 require 'fails_viewer_factory.php';
 
 # TODO Niech wyjątki przyjmują obiekt View, który wywołał był błąd.
@@ -80,6 +81,23 @@ class FailsViewer extends Viewer
 
 		# End output buffering:
 		return $this->result = ob_get_clean();
+	}
+
+	##
+	## These methods will be available within view as $this->method_name().
+	##
+
+	/**
+	 * Asserts that given variables has been set for view.
+	 * Argument list is variable length.
+	 *
+	 * \throws ViewParameterMissingException if assertion fails.
+	 */
+	protected function assert_params()
+	{
+		foreach (func_get_args() as $param)
+			if (!isset ($this->variables->$param))
+				throw new ViewParameterMissingException ($param);
 	}
 }
 

@@ -50,6 +50,41 @@ class Controller implements DynamicMethod, CallCatcher
 		$this->controller	= Fails::$controller;
 	}
 
+	public function do_action ($method_name)
+	{
+		try {
+			# Before-filter:
+			$bf = true;
+			if (method_exists ($this, 'before_filter'))
+				$bf = $this->before_filter();
+
+			# Action:
+			if ($bf !== false)
+				$this->$method_name();
+
+			# After-filter:
+			if (method_exists ($this, 'after_filter'))
+				$this->after_filter();
+		}
+		catch (Exception $e)
+		{
+			if (method_exists ($this, 'rescue_action'))
+			{
+				try {
+					$this->rescue_action ($e);
+				}			
+				catch (Exception $e)
+				{
+					$this->render_exception ($e);
+				}
+			}
+			else
+			{
+				$this->render_exception ($e);
+			}
+		}
+	}
+
 	/**
 	 * Returns an array of parameter values.
 	 */
@@ -105,13 +140,38 @@ class Controller implements DynamicMethod, CallCatcher
 		return $ary;
 	}
 
+	##
+	## Rendering methods.
+	##
+	## All render_* methods return rendered content as a string.
+	##
+
+	/**
+	 * Renders exception.
+	 */
+	private function render_exception (Exception $e)
+	{
+		$this->set->exception = $e;
+		$this->render_template ('exceptions/exception', 'system', '500 Internal server error: exception thrown');
+	}
+
+	/**
+	 * Renders current action template.
+	 *
+	 * 'layout' and 'status' parameters have the same meaning as in 'render_action' method.
+	 */
+	protected function render ($layout = null, $status = null)
+	{
+		return $this->render_action ($this->dispatcher->action_name, $layout, $status);
+	}
+
 	/**
 	 * Renders an action template.
 	 *
 	 * \param	action
 	 * 			Template name (without extension) relative to current controller's templates directory.
 	 * \param	layout
-	 * 			Layout name. If null or true - current layout is used. If false - no layout is used.
+	 * 			If string - layout name to be used. If null or true - current layout is used. If false - no layout is used.
 	 * \param	status
 	 * 			Response status string or integer. If null, default is applied (depends on Response object,
 	 * 			mostly it will be "200 OK" or for example "304 Not Modified", etc.).
@@ -162,34 +222,38 @@ class Controller implements DynamicMethod, CallCatcher
 	}
 
 	/**
-	 * TODO opis
+	 * \param	object
+	 * 			Any objecto to transform to JSON.
+	 */
+	protected function render_json ($object, $status = null)
+	{
+		return $this->render_text (json_encode ($object), false, $status);
+	}
+
+	/**
+	 * This is main rendering method. All other methods end up calling this (directly or indirectly).
+	 *
+	 * \param	text
+	 * 			Text to render.
+	 *
+	 * Other parameters as in render_action().
 	 */
 	protected function render_text ($text, $layout = null, $status = null)
 	{
-		# TODO przekazywać wynik do response
+		# Set status:
+		if ($status !== null)
+			$this->response->set_status ($status);
+		# Set content:
 		if ($layout === false)
 			return $this->content_for['layout'] = $this->content_for['action'] = $text;
 		else
 		{
 			$this->content_for['action'] = $text;
-			return $this->content_for['layout'] = $this->render_template ('layouts/user', false, $status);
+			# Use controller's default layout, if layout is null:
+			if ($layout === null)
+				$layout = $this->layout;
+			return $this->content_for['layout'] = $this->render_template ('layouts/'.$layout, false, $status);
 		}
-	}
-
-	/**
-	 * TODO opis
-	 */
-	protected function render_json ($object, $status = null)
-	{
-		# TODO Use json::encode()/decode from infopedia/php-framework
-	}
-
-	/**
-	 * Prevents setting rendered output as response content.
-	 */
-	protected function render_nothing()
-	{
-		# TODO
 	}
 
 	##

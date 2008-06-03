@@ -1,0 +1,12 @@
+@charset "UTF-8";
+
+html, body {
+	font-family: 'Arial', 'Trebuchet MS', 'Verdana', sans-serif;
+	font-size: 12pt;
+	background: #fff;
+}
+
+.exception-dump {
+	white-space: pre-wrap;
+	font-family: fixed;
+}

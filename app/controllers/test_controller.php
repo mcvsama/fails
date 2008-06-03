@@ -2,6 +2,8 @@
 
 class TestController extends ApplicationController
 {
+	public $layout = 'user';
+
 	function _test_routes()
 	{
 		# TODO na response
@@ -11,12 +13,11 @@ class TestController extends ApplicationController
 		# Lub jako parametr $this->render ('name', …, Response::TYPE_XHTML).
 		# Dlatego trza uważać, ale można to wyłączyć: $this->auto_set_mime = false; czy coś podobnego
 		$this->response->set_header ('Content-Type', 'text/html; charset=UTF-8');
-		$this->render_action ('test.xhtml');
-		list ($a, $b) = $this->params ('a', 'b', 'z');
-
-		$a = new DatabaseQuery ('SELECT * FROM users WHERE username IN (:0)', array ('mcv', 'test'));
-		$d = new PostgreSQLDriver ('localhost', 'stoliki', 'stoliki', '');
-		$d->exec ($a);
+		$c = new PostgreSQLDriver ('localhost', 'mcv', '', 'infopedia');
+#		$q = new DatabaseQuery ('SELECT * FROM users WHERE username != :0 AND id IN (:1)', 'user', array (1, 2, 5, 12));
+		$this->set->connection = $c;
+		$this->render();
+#		list ($a, $b) = $this->params ('a', 'b', 'z');
 	}
 }
 

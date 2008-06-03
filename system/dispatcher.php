@@ -1,5 +1,6 @@
 <?php # vim: set fenc=utf8 ts=4 sw=4:
 
+# This is a Fails' Front Controller.
 class Dispatcher
 {
 	public $logger;
@@ -66,7 +67,7 @@ class Dispatcher
 		$this->require_files_from_list (FAILS_ROOT.'/system/functions/FUNCTIONS');
 		# Load system classes:
 		$this->require_files_from_list (FAILS_ROOT.'/system/CLASSES');
-		# Load core configurations:
+		# Load cascading configurations:
 		# TODO
 	}
 
@@ -172,40 +173,12 @@ class Dispatcher
 	 */
 	private function call_action()
 	{
-		/* TODO this idea:
-		Controller::action_wrapper()
-		{
-		  $this->action();
-		}
-
-		# Overwrite:
-		function action_wrapper()
-		{
-		  try {
-			$this->action();
-		  }
-		  catch (...)
-		  {
-		  }
-		}
-		*/
-
 		$method_name = Inflector::to_action_name ($this->action_name);
 		if (!method_exists ($this->controller, $method_name))
 			throw new MissingActionException ("couldn't find action '{$method_name}'");
 
-		# Before-filter:
-		$bf = true;
-		if (method_exists ($this->controller, 'before_filter'))
-			$bf = $this->controller->before_filter();
-
 		# Call action:
-		if ($bf !== false)
-			$this->controller->$method_name();
-
-		# After-filter:
-		if (method_exists ($this->controller, 'after_filter'))
-			return $this->controller->after_filter();
+		$this->controller->do_action ($method_name);
 
 		# Set content for response:
 		$this->response->set_content ($this->controller->content_for_layout());

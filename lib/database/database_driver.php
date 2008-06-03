@@ -8,6 +8,10 @@ abstract class DatabaseDriver
 	const READ_COMMITED		= 'READ COMMITTED';
 	const READ_UNCOMMITED	= 'READ UNCOMMITTED';
 
+	# Relation types:
+	const TABLE	= 1;
+	const VIEW	= 2;
+
 	# Transactions depth:
 	private $transaction_depth;
 
@@ -42,6 +46,9 @@ abstract class DatabaseDriver
 	 *  * numbers are converted to string and returned,
 	 *  * arrays are coverted to 'a, b, c' values, where each value is sqlized recursively.
 	 *  * DatabaseQueries will be changed to SQL strings (useful for subqueries).
+	 *
+	 * \throws	UnsupportedTypeForSQLException
+	 * 			when object type cannot be mapped to SQL.
 	 *
 	 * \returns	SQL string.
 	 */
@@ -78,12 +85,30 @@ abstract class DatabaseDriver
 	abstract public function escape_relation_name ($string);
 
 	/**
-	 * Returns list of relations.
+	 * Returns list of relations as array of objects with attributes:
+	 *  name		=> 'relation name'
+	 *  type		=> DatabaseDriver::TABLE | ::VIEW | null
 	 */
 	abstract public function dump_relations();
 
 	/**
-	 * Returns relation attributes.
+	 * Returns relation attributes info as array of objects with attributes:
+	 *  name		=> 'attribute name',
+	 *  type		=> 'attribute type',
+	 *  params		=> map of type parameters,
+	 *  allow_null	=> true/false.
+	 * Attribute types are (params):
+	 *  * 'boolean'
+	 *  * 'binary'		(min_size, max_size)
+	 *  * 'string'		(min_length, max_length)
+	 *  * 'integer'		(min_value, max_value)
+	 *  * 'numeric'		(precision, scale)
+	 *  * 'float'		(precision)
+	 *  * 'date'
+	 *  * 'time'		(precision, with_timezone)
+	 *  * 'datetime'	(precision, with_timezone)
+	 *  * 'interval'	(precision)
+	 *  * 'bitvector'	(min_length, max_length)
 	 */
 	abstract public function dump_attributes_of ($relation_name);
 

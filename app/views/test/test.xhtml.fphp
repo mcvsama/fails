@@ -1,4 +1,0 @@
-<p>Hello World!</p>
-<p><? var_dump ($this->user_show_url (array ('user_id' => 33))) ?></p>
-<p><? var_dump ($this->index_url (array ('x' => 12))) ?></p>
-<p><? var_dump ($this->content_for_test()) ?></p>

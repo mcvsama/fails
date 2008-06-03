@@ -1,6 +1,6 @@
 <?php # vim: set fenc=utf8 ts=4 sw=4:
 
-class Session
+class Session implements ArrayAccess
 {
 	private $vars;
 
@@ -33,7 +33,7 @@ class Session
 	}
 
 	/**
-	 * Gets all values from session.
+	 * Gets all values from session in cloned map.
 	 */
 	public function get_all()
 	{
@@ -60,6 +60,42 @@ class Session
 	{
 		foreach ($this->vars as $key => $value)
 			$this->delete ($key);
+	}
+
+	##
+	## ArrayAccess
+	##
+
+	/**
+	 * Implementation of ArrayAccess::offsetExists().
+	 */
+	public function offsetExists ($offset)
+	{
+		return $this->get ($offset) !== null;
+	}
+
+	/**
+	 * Implementation of ArrayAccess::offsetGet().
+	 */
+	public function offsetGet ($offset)
+	{
+		return $this->get ($offset);
+	}
+
+	/**
+	 * Implementation of ArrayAccess::offsetSet().
+	 */
+	public function offsetSet ($offset, $value)
+	{
+		return $this->set ($offset, $value);
+	}
+
+	/**
+	 * Implementation of ArrayAccess::offsetUnset().
+	 */
+	public function offsetUnset ($offset)
+	{
+		return $this->delete ($offset);
 	}
 }
 

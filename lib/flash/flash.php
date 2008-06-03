@@ -39,9 +39,9 @@ class Flash extends Library
 	 */
 	public function add ($type, $message)
 	{
-		$a = $this->session->get ('__flash_'.$type);
+		$a = $this->session['__flash_'.$type];
 		$a[] = $message;
-		$this->session->set ('__flash_'.$type, $a);
+		$this->session['__flash_'.$type] = $a;
 	}
 
 	/**

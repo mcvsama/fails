@@ -1,0 +1,25 @@
+<? $this->assert_params ('connection') ?>
+<p>Hello World!</p>
+<p><? d ($this->user_show_url (array ('user_id' => 33))) ?></p>
+<p><? d ($this->index_url (array ('x' => 12))) ?></p>
+<p><? d ($this->content_for_test()) ?></p>
+<table border="1">
+	<? foreach ($connection->dump_relations() as $relation): ?>
+		<tr>
+			<th colspan="4"><% $relation->name %></th>
+		</tr>
+		<?	foreach ($connection->dump_attributes_of ($relation->name) as $attribute): ?>
+			<tr>
+				<td><% $attribute->name %></td>
+				<td><% $attribute->type %></td><td>
+					<? $k = array() ?>
+					<? foreach ($attribute->params as $p => $n): ?>
+						<? $k[] = h($p.': '.(($n === null)? 'unknown' : $n)) ?>
+					<? endforeach ?>
+					<?= implode ('; ', $k) ?>
+				</td>
+				<td><% $attribute->allow_null? '' : 'NOT NULL' %></td>
+			</tr>
+		<? endforeach ?>
+	<? endforeach ?>
+</table>

@@ -31,10 +31,22 @@ class InvalidDatabaseQueryException extends DatabaseException
 {
 	public $query;
 
-	public function __construct ($query, $message = null, $code = null)
+	public function __construct (DatabaseQuery $query, $message = null, $code = null)
 	{
 		parent::__construct ($message, $code);
 		$this->query = $query;
+	}
+}
+
+
+class DatabaseResultReadOnlyException extends DatabaseException
+{
+	public $result;
+
+	public function __construct (DatabaseResult $result, $message = null, $code = null)
+	{
+		parent::__construct ($message, $code);
+		$this->result = $result;
 	}
 }
 
