@@ -8,7 +8,8 @@ Fails::$router->connect ('user',			'user/:user_id/:action',	array ('action' => '
 Fails::$router->connect ('user_show',		'user/:user_id/show');
 Fails::$router->end_with();
 
-# Default route with lowest priority (at the end):
+# Default route with lowest priority (at the end).
+# May be a security hole, you'll probably want to remove it.
 Fails::$router->connect (null, ':controller/:action/:id', array ('id' => null));
 
 ?>

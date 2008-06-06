@@ -2,6 +2,13 @@
 
 class ApplicationController extends Controller
 {
+	# Database connection:
+	protected $db;
+
+	public function before_filter()
+	{
+		$this->db = new PostgreSQLDriver ('localhost', 'mcv', '', 'infopedia');
+	}
 }
 
 ?>

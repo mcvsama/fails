@@ -6,17 +6,10 @@ class TestController extends ApplicationController
 
 	function _test_routes()
 	{
-		# TODO na response
-		#$this->response->set_header ('Content-Type', 'text/plain; charset=UTF-8');
-		#$this->response->set_content_type ('text/plain; charset=UTF-8');
-		# TYP MIME ustawiany na podstawie tego, co jest renderowane (typ widoku).
-		# Lub jako parametr $this->render ('name', …, Response::TYPE_XHTML).
-		# Dlatego trza uważać, ale można to wyłączyć: $this->auto_set_mime = false; czy coś podobnego
-		$this->response->set_header ('Content-Type', 'text/html; charset=UTF-8');
-		$c = new PostgreSQLDriver ('localhost', 'mcv', '', 'infopedia');
+		$this->response->set_content_type ('text/html; charset=UTF-8');
 #		$q = new DatabaseQuery ('SELECT * FROM users WHERE username != :0 AND id IN (:1)', 'user', array (1, 2, 5, 12));
-		$this->set->connection = $c;
-		$this->render();
+		$this->set->connection = $this->db;
+#		$this->render();
 #		list ($a, $b) = $this->params ('a', 'b', 'z');
 	}
 }

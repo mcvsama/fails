@@ -9,6 +9,7 @@ class Fails
 	public static $response;
 	public static $router;
 	public static $session;
+	public static $config;
 }
 
 ?>

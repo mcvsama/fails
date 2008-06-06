@@ -26,6 +26,7 @@ class Dispatcher
 	{
 		try {
 			$this->load_files();
+			$this->check_config();
 			$this->prepare_environment();
 			$this->setup_error_handling();
 			$this->load_libraries();
@@ -74,7 +75,37 @@ class Dispatcher
 		# Load system classes:
 		$this->require_files_from_list (FAILS_ROOT.'/system/CLASSES');
 		# Load cascading configurations:
+		$this->require_file (FAILS_ROOT.'/config/environment.inc');
 		# TODO
+	}
+
+	/**
+	 * Checks if all required config values are set.
+	 */
+	private function check_config()
+	{
+		$e = array();
+		if (!isset (Fails::$config->fails))
+			$e[] = 'Fails::$config->fails not set';
+		else
+		{
+			$properties = array ('render_exceptions', 'auto_rendering', 'error_404_file', 'error_500_file');
+			$error_files = array ('error_404_file', 'error_500_file');
+
+			foreach (array_merge ($properties, $error_files) as $v)
+				if (!isset (Fails::$config->fails->$v))
+					$e[] = '• <code>Fails::$config->fails->'.$v.'</code> not set';
+
+			foreach ($error_files as $v)
+				if (isset (Fails::$config->fails->$v) && @file_get_contents (FAILS_ROOT.'/public/'.Fails::$config->fails->$v) === false)
+					$e[] = '• error file <code>'.Fails::$config->fails->$v.'</code> defined by <code>Fails::$config->fails->'.$v.'</code> is not accessible';
+		}
+
+		if (count ($e))
+		{
+			$this->render_error ('Configuration error', implode ('<br>', $e));
+			die();
+		}
 	}
 
 	/**
@@ -112,9 +143,6 @@ class Dispatcher
 		#
 
 		Fails::$dispatcher = $this;
-
-		# Environment:
-		$this->require_file (FAILS_ROOT.'/config/environment.inc');
 
 		# Logger:
 		Fails::$logger = $this->logger = new Logger (FAILS_ROOT.'/log/default');
@@ -159,7 +187,7 @@ class Dispatcher
 		$f = realpath ($b.$this->controller_name.'_controller.php');
 		# Throw exception if $controller_name pointed out of controllers directory:
 		if (strpos ($f, $b) !== 0)
-			throw new MissingControllerException ("invalid controller name '{$this->controller_name}'");
+			throw new MissingControllerException ("couldn't find controller '{$this->controller_name}'");
 		# ApplicationController, Helper, Model, Presenter:
 		$this->require_file (FAILS_ROOT.'/app/models/application_model.php');
 		$this->require_file (FAILS_ROOT.'/app/helpers/application_helper.php');
@@ -181,7 +209,7 @@ class Dispatcher
 	{
 		$method_name = Inflector::to_action_name ($this->action_name);
 		if (!method_exists ($this->controller, $method_name))
-			throw new MissingActionException ("couldn't find action '{$method_name}'");
+			throw new MissingActionException ("couldn't find action '{$this->action_name}'");
 
 		# Call action:
 		$this->controller->do_action ($method_name);
@@ -232,15 +260,44 @@ class Dispatcher
 
 	private function render_exception (Exception $e)
 	{
-		header ('Status: 500 Internal server error: uncaught exception');
+		if (Fails::$config->fails->render_exceptions)
+		{
+			header ('Status: 500 Internal server error: uncaught exception');
+			header ('Content-Type: text/html; charset=UTF-8');
+			$v = @file_get_contents (FAILS_ROOT.'/system/views/exception.php');
+			if ($v === false)
+				throw new Exception ('internal error: could not load exception view');
+			$r = eval ("?>$v<?php ");
+			if ($r === false)
+				throw new Exception ('internal error: error in exception view');
+			echo $r;
+		}
+		else
+		{
+			if ($e instanceof RouteNotFoundException)
+			{
+				$s = '404 Not found';
+				$f = FAILS_ROOT.'/public/'.Fails::$config->fails->error_404_file;
+			}
+			else
+			{
+				$s = '500 Internal server error';
+				$f = FAILS_ROOT.'/public/'.Fails::$config->fails->error_500_file;
+			}
+
+			header ('Status: '.$s);
+			header ('Content-Type: text/html; charset=UTF-8');
+
+			# File existence has been asserted in check_config().
+			echo file_get_contents ($f);
+		}
+	}
+
+	private function render_error ($header_html, $content_html)
+	{
 		header ('Content-Type: text/html; charset=UTF-8');
-		$v = @file_get_contents (FAILS_ROOT.'/system/views/exception.php');
-		if ($v === false)
-			throw new Exception ('internal error: could not load exception view');
-		$r = eval ("?>$v<?php ");
-		if ($r === false)
-			throw new Exception ('internal error: error in exception view');
-		echo $r;
+		echo "<h1>$header_html</h1>";
+		echo "<p>$content_html</p>";
 	}
 }
 

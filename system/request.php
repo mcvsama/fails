@@ -80,8 +80,8 @@ class Request
 	private function setup_base_url()
 	{
 		# Base URL:
-		if (defined ('CONFIG_BASE_URL'))
-			$this->base_url = CONFIG_BASE_URL;
+		if (Fails::$config->fails->base_url !== null)
+			$this->base_url = Fails::$config->fails->base_url;
 		else
 		{
 			# Base URL is common leading part of REQUEST_URI and SCRIPT_NAME variables.

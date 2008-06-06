@@ -9,8 +9,11 @@ class Session implements ArrayAccess
 	 */
 	public function __construct()
 	{
+		$sn = Fails::$config->fails->session_id;
+		if (!is_string ($sn) || is_blank ($sn))
+			throw new SecurityException ('session identifier not set: $config->fails->session_id');
 		session_start();
-		session_name (CONFIG_SESSION_ID);
+		session_name ($sn);
 		$this->vars = &$_SESSION;
 
 		unset ($_SESSION);

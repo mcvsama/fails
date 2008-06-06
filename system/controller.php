@@ -62,6 +62,11 @@ class Controller implements DynamicMethod, CallCatcher
 			if ($bf !== false)
 				$this->$method_name();
 
+			# Autorendering:
+			if (Fails::$config->fails->auto_rendering)
+				if (!isset ($this->content_for['layout']))
+					$this->render();
+
 			# After-filter:
 			if (method_exists ($this, 'after_filter'))
 				$this->after_filter();
@@ -225,14 +230,12 @@ class Controller implements DynamicMethod, CallCatcher
 		if ($status !== null)
 			$this->response->set_status ($status);
 		# Set content:
-		if ($layout === false)
+		$layout = coalesce ($layout, $this->layout);
+		if ($layout === false || $layout === null)
 			return $this->content_for['layout'] = $this->content_for['action'] = $text;
 		else
 		{
 			$this->content_for['action'] = $text;
-			# Use controller's default layout, if layout is null:
-			if ($layout === null)
-				$layout = $this->layout;
 			return $this->content_for['layout'] = $this->render_template ('layouts/'.$layout, false, $status);
 		}
 	}

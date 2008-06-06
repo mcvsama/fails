@@ -16,6 +16,7 @@ class Response
 		$this->set_content_type ('text/html; charset=UTF-8');
 		$this->set_status ('200 OK');
 		$this->redirect_to (null);
+		$this->headers = array();
 	}
 
 	/**
