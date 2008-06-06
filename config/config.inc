@@ -9,6 +9,12 @@ Fails::$config->fails->base_url = null;
 # Whether to display exception dumps of uncaught exceptions (or predefined error pages otherwise):
 Fails::$config->fails->render_exceptions = false;
 
+# Whether to display PHP errors (warnings/notices/etc):
+Fails::$config->fails->display_errors = true;
+
+# Error reporting threshold:
+Fails::$config->fails->display_errors_threshold = E_ALL;
+
 # Auto rendering:
 Fails::$config->fails->auto_rendering = false;
 

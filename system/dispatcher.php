@@ -89,7 +89,7 @@ class Dispatcher
 			$e[] = 'Fails::$config->fails not set';
 		else
 		{
-			$properties = array ('render_exceptions', 'auto_rendering', 'error_404_file', 'error_500_file');
+			$properties = array ('render_exceptions', 'display_errors', 'auto_rendering', 'error_404_file', 'error_500_file');
 			$error_files = array ('error_404_file', 'error_500_file');
 
 			foreach (array_merge ($properties, $error_files) as $v)
@@ -118,18 +118,13 @@ class Dispatcher
 		#
 
 		set_magic_quotes_runtime (0);
-		# TODO set_error_handler ('php_error_handler', E_ALL);
 		ini_set ('arg_separator.output', '&amp;');
-		ini_set ('display_errors', 0);
+		ini_set ('display_errors', Fails::$config->fails->display_errors? 1 : 0);
 		ini_set ('log_errors', 1);
-		ini_set ('session.name', '_sessid');
-		ini_set ('expose_php', 0);
+		ini_set ('session.name', Fails::$config->fails->session_id);
 		ini_set ('short_open_tag', 1);
 		ini_set ('default_charset', 'UTF-8');
-
-		# Show only fatal errors:
-		error_reporting (E_ALL);
-		# TODO date_default_timezone_set (CONFIG_DEFAULT_TIMEZONE);
+		error_reporting (Fails::$config->fails->display_errors_threshold);
 
 		# Unset deprecated superglobals:
 		$HTTP_GET_VARS		= null;

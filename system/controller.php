@@ -62,8 +62,8 @@ class Controller implements DynamicMethod, CallCatcher
 			if ($bf !== false)
 				$this->$method_name();
 
-			# Autorendering:
-			if (Fails::$config->fails->auto_rendering)
+			# Autorendering unless redirected:
+			if (Fails::$config->fails->auto_rendering && !$this->response->is_redirected())
 				if (!isset ($this->content_for['layout']))
 					$this->render();
 
