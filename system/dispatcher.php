@@ -24,11 +24,17 @@ class Dispatcher
 	 */
 	public function __construct()
 	{
-		$this->load_files();
-		$this->prepare_environment();
-		$this->setup_error_handling();
-		$this->load_libraries();
-		$this->call_action();
+		try {
+			$this->load_files();
+			$this->prepare_environment();
+			$this->setup_error_handling();
+			$this->load_libraries();
+			$this->call_action();
+		}
+		catch (Exception $e)
+		{
+			$this->render_exception ($e);
+		}
 	}
 
 	/**
@@ -222,6 +228,19 @@ class Dispatcher
 	{
 		if ((include_once $file_name) === false)
 			throw new RequireFileException ("couldn't load file '".basename ($file_name)."'");
+	}
+
+	private function render_exception (Exception $e)
+	{
+		header ('Status: 500 Internal server error: uncaught exception');
+		header ('Content-Type: text/html; charset=UTF-8');
+		$v = @file_get_contents (FAILS_ROOT.'/system/views/exception.php');
+		if ($v === false)
+			throw new Exception ('internal error: could not load exception view');
+		$r = eval ("?>$v<?php ");
+		if ($r === false)
+			throw new Exception ('internal error: error in exception view');
+		echo $r;
 	}
 }
 

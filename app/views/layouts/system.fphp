@@ -1,9 +1,0 @@
-<?xml version='1.0'?>
-<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
-	<head>
-		<link rel='stylesheet' charset='UTF-8' type='text/css' href='<% Fails::$request->base_url() %>/stylesheets/system.css'/>
-	</head>
-	<body>
-		<?= $this->content_for_action() ?>
-	</body>
-</html>

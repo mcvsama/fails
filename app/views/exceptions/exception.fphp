@@ -1,3 +1,0 @@
-<? $this->assert_params ('exception') ?>
-<h1><% get_class ($exception) %></h1>
-<p class='exception-dump'><% $exception %></p>

@@ -1,3 +1,6 @@
+<html lang='en'>
+<head>
+<style type='text/css'>
 @charset "UTF-8";
 
 html, body {
@@ -10,3 +13,11 @@ html, body {
 	white-space: pre-wrap;
 	font-family: fixed;
 }
+</style>
+</head>
+<body>
+	<h1><?=h (get_class ($e)) ?></h1>
+	<p class='exception-dump'><?=h ($e) ?></p>
+</body>
+</html>
+

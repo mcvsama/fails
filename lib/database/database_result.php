@@ -5,9 +5,16 @@ abstract class DatabaseResult implements ArrayAccess, Iterator
 	private $size;
 	private $position;
 	private $affected_rows;
+
+	# Relation's attribute names:
 	private $attributes;
+
+	# Array of arrays: query data:
 	private $data;
 
+	/**
+	 * Ctor. Not available for user.
+	 */
 	protected function __construct ($size, $affected_rows, array $attributes, array $data)
 	{
 		$this->size = $size;

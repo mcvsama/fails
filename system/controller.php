@@ -69,19 +69,9 @@ class Controller implements DynamicMethod, CallCatcher
 		catch (Exception $e)
 		{
 			if (method_exists ($this, 'rescue_action'))
-			{
-				try {
-					$this->rescue_action ($e);
-				}			
-				catch (Exception $e)
-				{
-					$this->render_exception ($e);
-				}
-			}
+				$this->rescue_action ($e);
 			else
-			{
-				$this->render_exception ($e);
-			}
+				throw $e;
 		}
 	}
 
@@ -145,15 +135,6 @@ class Controller implements DynamicMethod, CallCatcher
 	##
 	## All render_* methods return rendered content as a string.
 	##
-
-	/**
-	 * Renders exception.
-	 */
-	private function render_exception (Exception $e)
-	{
-		$this->set->exception = $e;
-		$this->render_template ('exceptions/exception', 'system', '500 Internal server error: exception thrown');
-	}
 
 	/**
 	 * Renders current action template.
