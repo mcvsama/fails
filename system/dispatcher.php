@@ -74,9 +74,9 @@ class Dispatcher
 		$this->require_files_from_list (FAILS_ROOT.'/system/functions/FUNCTIONS');
 		# Load system classes:
 		$this->require_files_from_list (FAILS_ROOT.'/system/CLASSES');
-		# Load cascading configurations:
-		$this->require_file (FAILS_ROOT.'/config/environment.inc');
-		# TODO
+		# Load configuration and environment:
+		$this->require_file (FAILS_ROOT.'/config/config.inc');
+		$this->require_file (FAILS_ROOT.'/config/environments/'.Fails::$config->fails->environment.'/config.inc');
 	}
 
 	/**

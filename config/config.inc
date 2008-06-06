@@ -7,13 +7,16 @@ Fails::$config->fails->session_id = 'test';
 Fails::$config->fails->base_url = null;
 
 # Whether to display exception dumps of uncaught exceptions (or predefined error pages otherwise):
-Fails::$config->fails->render_exceptions = true;
+Fails::$config->fails->render_exceptions = false;
 
 # Auto rendering:
-Fails::$config->fails->auto_rendering = true;
+Fails::$config->fails->auto_rendering = false;
 
 # Error pages:
 Fails::$config->fails->error_404_file = 'error-404.html';
 Fails::$config->fails->error_500_file = 'error-500.html';
+
+# Environment:
+Fails::$config->fails->environment = 'development';
 
 ?>
