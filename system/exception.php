@@ -17,6 +17,11 @@ class UnimplementedException extends Exception
 {
 }
 
+
+class InvalidOperation extends Exception
+{
+}
+
 ##
 ## Dispatcher exceptions
 ##

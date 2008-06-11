@@ -3,6 +3,7 @@
 class PostgreSQLDriver extends DatabaseDriver
 {
 	private $pg_link;
+	private $cached_dump_relations;
 
 	/**
 	 * Ctor
@@ -132,6 +133,9 @@ class PostgreSQLDriver extends DatabaseDriver
 	 */
 	public function dump_relations()
 	{
+		if ($this->cached_dump_relations !== null)
+			return $this->cached_dump_relations;
+
 		$sql = "SELECT * FROM information_schema.tables";
 		$r = @pg_query ($this->pg_link, $sql);
 
@@ -149,10 +153,10 @@ class PostgreSQLDriver extends DatabaseDriver
 			$o->type	= null;
 			if ($row['table_type'] == 'BASE TABLE')		$o->type	= DatabaseDriver::TABLE;
 			else if ($row['table_type'] == 'VIEW')		$o->type	= DatabaseDriver::VIEW;
-			$dump[] = $o;
+			$dump[$o->name] = $o;
 		}
 
-		return $dump;
+		return $this->cached_dump_relations = $dump;
 	}
 
 	/**
@@ -185,7 +189,7 @@ class PostgreSQLDriver extends DatabaseDriver
 			$o->type		= $type;
 			$o->params		= $params;
 			$o->allow_null	= $row['not_null'] == 'f';
-			$dump[] = $o;
+			$dump[$o->name] = $o;
 		}
 
 		return $dump;

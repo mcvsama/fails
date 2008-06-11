@@ -85,17 +85,18 @@ abstract class DatabaseDriver
 	abstract public function escape_relation_name ($string);
 
 	/**
-	 * Returns list of relations as array of objects with attributes:
+	 * Returns list of relations as map of relation names to objects with attributes:
 	 *  name		=> 'relation name'
 	 *  type		=> DatabaseDriver::TABLE | ::VIEW | null
+	 * Returned value may be cached (for performance).
 	 */
 	abstract public function dump_relations();
 
 	/**
-	 * Returns relation attributes info as array of objects with attributes:
+	 * Returns relation attributes info as map of attribute names to objects with attributes:
 	 *  name		=> 'attribute name',
 	 *  type		=> 'attribute type',
-	 *  params		=> map of type parameters,
+	 *  params		=> object with type-specific parameters,
 	 *  allow_null	=> true/false.
 	 * Attribute types are (params):
 	 *  * 'boolean'

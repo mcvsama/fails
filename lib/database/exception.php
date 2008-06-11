@@ -15,6 +15,11 @@ class MissingParametersForPlaceholdersException extends DatabaseException
 }
 
 
+class InvalidDatabaseConnectionNameException extends DatabaseException
+{
+}
+
+
 class UnsupportedTypeForSQLException extends DatabaseException
 {
 	public $object;

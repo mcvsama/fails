@@ -5,4 +5,12 @@ require 'database_driver.php';
 require 'database_query.php';
 require 'database_result.php';
 
+class Database
+{
+	# Map of named database connections:
+	public static $connections;
+}
+
+Database::$connections = array();
+
 ?>

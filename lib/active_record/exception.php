@@ -1,6 +1,16 @@
 <?php # vim: set fenc=utf8 ts=4 sw=4:
 
-class InvalidAttributeNameException extends Exception
+class ActiveRecordException extends Exception
+{
+}
+
+
+class RelationDoesNotExistException extends ActiveRecordException
+{
+}
+
+
+class InvalidAttributeNameException extends ActiveRecordException
 {
 	public $record;
 	public $attribute_name;

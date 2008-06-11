@@ -25,4 +25,6 @@ Fails::$config->fails->error_500_file = 'error-500.html';
 # Environment:
 Fails::$config->fails->environment = 'development';
 
+require 'exception_notifier.inc';
+
 ?>

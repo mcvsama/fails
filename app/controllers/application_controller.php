@@ -7,7 +7,14 @@ class ApplicationController extends Controller
 
 	public function before_filter()
 	{
-		$this->db = new PostgreSQLDriver ('localhost', 'mcv', '', 'infopedia');
+		$this->db = new PostgreSQLDriver ('localhost', 'mcv', '', 'fails');
+		Database::$connections[''] = $this->db;
+	}
+
+	public function rescue_action (Exception $e)
+	{
+		ExceptionNotifier::notify ($e);
+		throw $e;
 	}
 }
 

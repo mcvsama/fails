@@ -27,21 +27,10 @@ pre {
 	<pre><?=h (capitalize ($e->getMessage())) ?></pre>
 	<h2>Stack trace</h2>
 	<pre><?=h ($e->getTraceAsString()) ?></pre>
-	<? if (Fails::$request !== null): ?>
-		<h2>Pre-routing parameters</h2>
-		<h3>GET</h3>
-		<pre><?=h (array_to_string (Fails::$request->g)) ?></pre>
-		<h3>POST</h3>
-		<pre><?=h (array_to_string (Fails::$request->p)) ?></pre>
-	<? endif ?>
-	<? if (Fails::$dispatcher->merged_params !== null): ?>
-		<h2>Post-routing parameters</h2>
-		<pre><?=h (array_to_string (Fails::$dispatcher->merged_params)) ?></pre>
-	<? endif ?>
-	<? if (Fails::$session !== null): ?>
-		<h2>Session dump</h2>
-		<pre><?=h (array_to_string (Fails::$session->get_all())) ?></pre>
-	<? endif ?>
+	<? foreach (Fails::get_state() as $h => $c): ?>
+		<h2><?=h ($h) ?></h2>
+		<pre><?=h ($c) ?></pre>
+	<? endforeach ?>
 </body>
 </html>
 

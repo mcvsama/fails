@@ -30,6 +30,7 @@ class Dispatcher
 			$this->prepare_environment();
 			$this->setup_error_handling();
 			$this->load_libraries();
+			$this->load_models();
 			$this->call_action();
 		}
 		catch (Exception $e)
@@ -183,11 +184,8 @@ class Dispatcher
 		# Throw exception if $controller_name pointed out of controllers directory:
 		if (strpos ($f, $b) !== 0)
 			throw new MissingControllerException ("couldn't find controller '{$this->controller_name}'");
-		# ApplicationController, Helper, Model, Presenter:
-		$this->require_file (FAILS_ROOT.'/app/models/application_model.php');
-		$this->require_file (FAILS_ROOT.'/app/helpers/application_helper.php');
+		# ApplicationController:
 		$this->require_file (FAILS_ROOT.'/app/controllers/application_controller.php');
-		$this->require_file (FAILS_ROOT.'/app/presenters/application_presenter.php');
 		# Load file if everything seems OK:
 		$this->require_file ($f);
 		# Controller:
@@ -225,6 +223,15 @@ class Dispatcher
 		foreach (file ($file_name) as $line)
 			if (($stripped = trim ($line, " \n\r\v\t")) != '')
 				$this->load_library ($stripped);
+	}
+
+	/**
+	 * Loads models.
+	 */
+	private function load_models()
+	{
+		$this->require_file (FAILS_ROOT.'/app/models/application_model.php');
+		$this->require_files_from_list (FAILS_ROOT.'/app/models/MODELS');
 	}
 
 	/**
