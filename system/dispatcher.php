@@ -25,7 +25,7 @@ class Dispatcher
 	public function __construct()
 	{
 		try {
-			$this->load_files();
+			$this->load_system_files();
 			$this->check_config();
 			$this->prepare_environment();
 			$this->setup_error_handling();
@@ -69,7 +69,7 @@ class Dispatcher
 	/**
 	 * Loads files with functions and classes that are needed for work.
 	 */
-	private function load_files()
+	private function load_system_files()
 	{
 		# Load system functions:
 		$this->require_files_from_list (FAILS_ROOT.'/system/functions/FUNCTIONS');

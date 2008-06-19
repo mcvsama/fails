@@ -26,6 +26,9 @@ class ActiveRecord implements ArrayAccess
 	 *
 	 * \throws	InvalidAttributeNameException
 	 * 			When trying to set not existing (in relation) attribute.
+	 *
+	 * All attributes from $attributes_map will be initialized via setters/getters,
+	 * not directly.
 	 */
 	public function __construct (array $attributes_map = null, Database $db = null)
 	{

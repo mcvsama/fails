@@ -53,6 +53,10 @@ class Controller implements DynamicMethod, CallCatcher
 	public function do_action ($method_name)
 	{
 		try {
+			# Configure method:
+			if (method_exists ($this, 'configure'))
+				$this->configure();
+
 			# Before-filter:
 			$bf = true;
 			if (method_exists ($this, 'before_filter'))
@@ -162,7 +166,7 @@ class Controller implements DynamicMethod, CallCatcher
 	 * 			Response status string or integer. If null, default is applied (depends on Response object,
 	 * 			mostly it will be "200 OK" or for example "304 Not Modified", etc.).
 	 *
-	 * \throws	MissingViewException
+	 * \throws	ViewMissingException
 	 * 			When given template file can't be found or loaded.
 	 */
 	protected function render_action ($action, $layout = null, $status = null)
@@ -178,7 +182,7 @@ class Controller implements DynamicMethod, CallCatcher
 	 *
 	 * Other parameters as in render_action().
 	 *
-	 * \throws	MissingViewException
+	 * \throws	ViewMissingException
 	 * 			When given template file can't be found or loaded.
 	 */
 	protected function render_template ($template_name, $layout = null, $status = null)
@@ -194,7 +198,7 @@ class Controller implements DynamicMethod, CallCatcher
 	 *
 	 * Other parameters as in render_action().
 	 *
-	 * \throws	MissingViewException
+	 * \throws	ViewMissingException
 	 * 			When given template file can't be found or loaded.
 	 */
 	protected function render_file ($file_name, $layout = false, $status = null)
@@ -202,7 +206,7 @@ class Controller implements DynamicMethod, CallCatcher
 		# Load template file:
 		$content = @file_get_contents ($file_name);
 		if ($content === false)
-			throw new MissingViewException ("View template missing: '".$file_name."'");
+			throw new ViewMissingException ("View template missing: '".$file_name."'");
 		$processor = $this->get_processor ($content, $this->get_variables_for_view());
 		return $this->render_text ($processor->process(), $layout, $status);
 	}

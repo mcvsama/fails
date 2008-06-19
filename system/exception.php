@@ -4,6 +4,11 @@
 ## General exceptions
 ##
 
+class ParserException extends Exception
+{
+}
+
+
 class MethodMissingException extends Exception
 {
 	public function __construct ($name, $object)
@@ -93,12 +98,12 @@ class RoutePathInvalidException extends Exception
 ## View exceptions
 ##
 
-class MissingViewException extends Exception
+class ViewMissingException extends Exception
 {
 }
 
 
-class ViewParsingException extends Exception
+class ViewParserException extends Exception
 {
 }
 
@@ -115,7 +120,7 @@ class ViewEngineAlreadyRegisteredException extends Exception
 }
 
 
-class MissingViewEngineException extends Exception
+class ViewEngineMissingException extends Exception
 {
 	public $identifier;
 

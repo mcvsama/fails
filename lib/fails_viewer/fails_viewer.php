@@ -68,7 +68,7 @@ class FailsViewer extends Viewer
 			$this->evaled_result = eval ('?>'.$this->replaced_contents.'<?php ');
 
 			if ($this->evaled_result === false)
-				throw new ViewParsingException ('Error parsing view code');
+				throw new ViewParserException ('Error on parsing view code');
 			else
 				echo $this->evaled_result;
 		}
