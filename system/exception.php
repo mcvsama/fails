@@ -28,6 +28,14 @@ class InvalidOperation extends Exception
 }
 
 ##
+## Inflector exceptions
+##
+
+class InflectorException extends Exception
+{
+}
+
+##
 ## Dispatcher exceptions
 ##
 

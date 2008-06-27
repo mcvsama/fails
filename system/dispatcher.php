@@ -30,7 +30,6 @@ class Dispatcher
 			$this->prepare_environment();
 			$this->setup_error_handling();
 			$this->load_libraries();
-			$this->load_models();
 			$this->call_action();
 		}
 		catch (Exception $e)
@@ -77,7 +76,15 @@ class Dispatcher
 		$this->require_files_from_list (FAILS_ROOT.'/system/CLASSES');
 		# Load configuration and environment:
 		$this->require_file (FAILS_ROOT.'/config/config.inc');
-		$this->require_file (FAILS_ROOT.'/config/environments/'.Fails::$config->fails->environment.'/config.inc');
+		$envdir = FAILS_ROOT.'/config/environments/'.Fails::$config->fails->environment;
+		$this->require_file ($envdir.'/config.inc');
+		# Load other .inc files:
+		$dir = @opendir ($envdir);
+		if ($dir !== false)
+			while (($entry = readdir ($dir)) !== false)
+				if ($entry !== 'config.inc')
+					if (is_file ("$envdir/$entry"))
+						$this->require_file ("$envdir/$entry");
 	}
 
 	/**
@@ -223,15 +230,6 @@ class Dispatcher
 		foreach (file ($file_name) as $line)
 			if (($stripped = trim ($line, " \n\r\v\t")) != '')
 				$this->load_library ($stripped);
-	}
-
-	/**
-	 * Loads models.
-	 */
-	private function load_models()
-	{
-		$this->require_file (FAILS_ROOT.'/app/models/application_model.php');
-		$this->require_files_from_list (FAILS_ROOT.'/app/models/MODELS');
 	}
 
 	/**

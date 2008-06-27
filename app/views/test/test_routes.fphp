@@ -1,4 +1,5 @@
 <? $this->assert_params ('connection') ?>
+<p><% Inflector::pluralize ('sheep') %></p>
 <p>Hello World!</p>
 <p><? d ($this->user_show_url (array ('user_id' => 33))) ?></p>
 <p><? d ($this->index_url (array ('x' => 12))) ?></p>
