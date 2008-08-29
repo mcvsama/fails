@@ -28,10 +28,26 @@ class InvalidOperation extends Exception
 }
 
 ##
+## Logger exceptions
+##
+
+class LoggerException extends Exception
+{
+}
+
+##
 ## Inflector exceptions
 ##
 
 class InflectorException extends Exception
+{
+}
+
+##
+## Response exceptions
+##
+
+class ResponseException extends Exception
 {
 }
 

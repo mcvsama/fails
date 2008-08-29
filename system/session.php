@@ -15,7 +15,6 @@ class Session implements ArrayAccess
 		session_start();
 		session_name ($sn);
 		$this->vars = &$_SESSION;
-
 		unset ($_SESSION);
 	}
 

@@ -5,7 +5,7 @@ class FailsViewerException extends Exception
 }
 
 
-class ViewParameterMissingException extends FailsViewerException
+class FailsViewParameterMissingException extends FailsViewerException
 {
 	public $param;
 

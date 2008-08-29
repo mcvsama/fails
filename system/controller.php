@@ -25,6 +25,9 @@ class Controller implements DynamicMethod, CallCatcher
 	# Identifier of engine to use:
 	private $current_factory;
 
+	# Whether autorender should be stopped:
+	private $stop_autorender = false;
+
 	/**
 	 * Ctor
 	 */
@@ -66,8 +69,8 @@ class Controller implements DynamicMethod, CallCatcher
 			if ($bf !== false)
 				$this->$method_name();
 
-			# Autorendering unless redirected:
-			if (Fails::$config->fails->auto_rendering && !$this->response->is_redirected())
+			# Autorendering unless redirected or already rendered:
+			if (Fails::$config->fails->auto_rendering && !$this->response->is_redirected() && !$this->stop_autorender)
 				if (!isset ($this->content_for['layout']))
 					$this->render();
 
@@ -217,7 +220,18 @@ class Controller implements DynamicMethod, CallCatcher
 	 */
 	protected function render_json ($object, $status = null)
 	{
+		$this->response->set_content_type ('application/json; charset=UTF-8');
 		return $this->render_text (json_encode ($object), false, $status);
+	}
+
+	/**
+	 * Renders nothing. Clears rendered result
+	 * and stops autorendering if endabled.
+	 */
+	protected function render_nothing()
+	{
+		$this->render_text (null);
+		$this->stop_autorender = true;
 	}
 
 	/**

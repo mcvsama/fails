@@ -2,5 +2,7 @@
 
 Fails::$config->fails->render_exceptions = false;
 Fails::$config->fails->display_errors = false;
+Fails::$config->fails->prevent_caching = false;
+Fails::$config->fails->auto_etagging = true;
 
 ?>

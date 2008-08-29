@@ -19,7 +19,7 @@ class FailsViewer extends Viewer
 
 	# Replacements applied to view code before eval():
 	public static $replacements = array (
-		# <&> and </&> javascript tags: TODO ?
+		# <&> and </&> javascript tags and escaping CDATA section.
 		'/<&>/'		=> "<script type='text/javascript'>/*<![CDATA[*/ ",
 		'/<\/&>/'	=> " /*]]>*/</script>",
 		# <? and <?= compatibility tags:
@@ -91,13 +91,13 @@ class FailsViewer extends Viewer
 	 * Asserts that given variables has been set for view.
 	 * Argument list is variable length.
 	 *
-	 * \throws ViewParameterMissingException if assertion fails.
+	 * \throws FailsViewParameterMissingException if assertion fails.
 	 */
 	protected function assert_params()
 	{
 		foreach (func_get_args() as $param)
 			if (!isset ($this->variables->$param))
-				throw new ViewParameterMissingException ($param);
+				throw new FailsViewParameterMissingException ($param);
 	}
 }
 

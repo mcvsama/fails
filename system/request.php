@@ -31,12 +31,28 @@ class Request
 	}
 
 	/**
+	 * Returns query-string, that is string after the '?' in URL.
+	 */
+	public function query_string()
+	{
+		return $this->env['QUERY_STRING'];
+	}
+
+	/**
 	 * Returns requested route string, without query parameters (those after '?')
 	 * and without base-url.
 	 */
 	public function route_string()
 	{
 		return $this->route_string;
+	}
+
+	/**
+	 * Returns complete URL for this request.
+	 */
+	public function url()
+	{
+		return $this->fully_qualified_base_url().'/'.$this->route_string().'?'.$this->query_string();
 	}
 
 	/**
@@ -56,7 +72,7 @@ class Request
 	}
 
 	/**
-	 * Returns 'http://' or 'https://'.
+	 * Returns 'http://' or 'https://' depending on current protocol scheme.
 	 */
 	public function protocol()
 	{
@@ -68,7 +84,96 @@ class Request
 	 */
 	public function scheme()
 	{
-		return (isset ($this->env['HTTPS']) && strtolower ($this->env['HTTPS']) == 'on')? 'https': 'http';
+		return (isset ($this->env['HTTPS']) && strtolower ($this->env['HTTPS']) == 'on')? 'https' : 'http';
+	}
+
+	/**
+	 * Returns lowercase request method.
+	 */
+	public function method()
+	{
+		return strtolower ($this->env['REQUEST_METHOD']);
+	}
+
+	/**
+	 * Returns true if request method is GET.
+	 */
+	public function is_get()
+	{
+		return $this->method() === 'get';
+	}
+
+	/**
+	 * Returns true if request method is POST.
+	 */
+	public function is_post()
+	{
+		return $this->method() === 'post';
+	}
+
+	/**
+	 * Returns true if request method is PUT.
+	 */
+	public function is_put()
+	{
+		return $this->method() === 'put';
+	}
+
+	/**
+	 * Returns true if request method is DELETE.
+	 */
+	public function is_delete()
+	{
+		return $this->method() === 'delete';
+	}
+
+	/**
+	 * Returns true if request method is HEAD.
+	 */
+	public function is_head()
+	{
+		return $this->method() === 'head';
+	}
+
+	/**
+	 * Returns request port, as integer.
+	 */
+	public function port()
+	{
+		return intval (coalesce ($this->env['SERVER_PORT'], 80));
+	}
+
+	/**
+	 * Returns client IP as string.
+	 */
+	public function client_ip()
+	{
+		return $this->env['REMOTE_ADDR'];
+	}
+
+	/**
+	 * Returns client TCP port number.
+	 */
+	public function client_port()
+	{
+		return intval ($this->env['REMOTE_PORT']);
+	}
+
+	/**
+	 * Returns true if url scheme is 'https'.
+	 */
+	public function is_secure()
+	{
+		return $this->scheme() === 'https';
+	}
+
+	/**
+	 * Returns true if request contains header X-Requested-With with value 'XMLHttpRequest'.
+	 * Useful for asynchronous request made with PrototypeJS.org.
+	 */
+	public function is_async()
+	{
+		return $this->env['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest';
 	}
 
 	##

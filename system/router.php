@@ -103,6 +103,21 @@ class Router implements DynamicMethod, CallCatcher
 		return $this->routes_by_name[$name]->generate_url ($params);
 	}
 
+	/**
+	 * \returns URL for given parameters.
+	 *			To use when no named route is defined.
+	 *
+	 * \param	route_segments
+	 * 			Route segments string, i.e. 'controller1/action3/:param'.
+	 * \param	params
+	 * 			Map of parameters for this route.
+	 */
+	public function url_for ($route_segments, array $params = array())
+	{
+		$r = new Route (null, $route_segments, $params);
+		return $r->generate_url ($params);
+	}
+
 	##
 	## Interface DynamicMethod
 	##

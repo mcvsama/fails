@@ -5,8 +5,8 @@ class Logger
 	private $file_name;
 
 	const CLASS_DEBUG	= 'debug';
-	const CLASS_INFO	= 'info';
-	const CLASS_WARN	= 'warn';
+	const CLASS_INFO	= 'info ';
+	const CLASS_WARN	= 'warn ';
 	const CLASS_ERROR	= 'error';
 	const CLASS_FATAL	= 'fatal';
 
@@ -27,6 +27,29 @@ class Logger
 	 */
 	public function add ($class, $message)
 	{
+		$utime = explode (' ', microtime());
+		$usec = ltrim ($utime[0], '0');
+		$datestr = date ('D d.m.Y H:i:s');
+		$datestrusec = $datestr.$usec.date ('O');
+
+		# Open log file for appending:
+		$f = @fopen ($this->file_name, 'a');
+
+		if (!$f)
+			throw new LoggerException ('could not open log file for appending');
+
+		# Wait for lock:
+		while (!flock ($f, LOCK_EX))
+			;
+
+		# Write log message:
+		fwrite ($f, $datestr." | ".$_SERVER['REMOTE_ADDR']." | <$class> ".$message."\n");
+
+		# Release lock:
+		flock ($f, LOCK_UN);
+
+		# Close file:
+		fclose ($f);
 	}
 
 	/**

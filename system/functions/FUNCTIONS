@@ -1,5 +1,6 @@
 array_to_string
 capitalize
+cdata_escape
 coalesce
 d
 h

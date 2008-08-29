@@ -1,6 +1,6 @@
 <?php # vim: set fenc=utf8 ts=4 sw=4:
 
-# This is a Fails' Front Controller.
+# This is Fails' Front Controller.
 class Dispatcher
 {
 	public $logger;
@@ -127,6 +127,7 @@ class Dispatcher
 
 		set_magic_quotes_runtime (0);
 		ini_set ('arg_separator.output', '&amp;');
+		ini_set ('zlib.output_compression', Fails::$config->fails->output_compression);
 		ini_set ('display_errors', Fails::$config->fails->display_errors? 1 : 0);
 		ini_set ('log_errors', 1);
 		ini_set ('session.name', Fails::$config->fails->session_id);
@@ -148,7 +149,7 @@ class Dispatcher
 		Fails::$dispatcher = $this;
 
 		# Logger:
-		Fails::$logger = $this->logger = new Logger (FAILS_ROOT.'/log/default');
+		Fails::$logger = $this->logger = new Logger (FAILS_ROOT.'/log/default.'.date('Y-m-d'));
 
 		# Session:
 		Fails::$session = $this->session = new Session();
@@ -214,8 +215,10 @@ class Dispatcher
 		# Call action:
 		$this->controller->do_action ($method_name);
 
-		# Set content for response:
-		$this->response->set_content ($this->controller->content_for_layout());
+		# Set content for response, if something has been rendered:
+		$content_for_layout = $this->controller->content_for_layout();
+		if ($content_for_layout !== null)
+			$this->response->set_body ($content_for_layout);
 
 		# Echo rendered result:
 		$this->response->answer();

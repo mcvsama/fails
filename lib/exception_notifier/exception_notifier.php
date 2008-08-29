@@ -2,7 +2,7 @@
 
 require 'exception.php';
 
-class ExceptionNotifier
+class ExceptionNotifier extends Library
 {
 	public static function notify (Exception $e)
 	{

@@ -2,7 +2,7 @@
 
 require 'exception.php';
 
-class DatabaseSelector
+class DatabaseSelector extends Library
 {
 	static function connect ($engine_name, $hostname, $username, $password, $database)
 	{

@@ -9,7 +9,7 @@
 		<tr>
 			<th colspan="4"><% $relation->name %></th>
 		</tr>
-		<?	foreach ($connection->dump_attributes_of ($relation->name) as $attribute): ?>
+		<? foreach ($connection->dump_attributes_of ($relation->name) as $attribute): ?>
 			<tr>
 				<td><% $attribute->name %></td>
 				<td><% $attribute->type %></td><td>

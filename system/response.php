@@ -3,8 +3,9 @@
 class Response
 {
 	private $content_type;
-	private $content;
-	private $status;
+	private $body;
+	private $status_code;
+	private $status_message;
 	private $redirection;
 	private $headers;
 
@@ -14,7 +15,7 @@ class Response
 	public function __construct()
 	{
 		$this->set_content_type ('text/html; charset=UTF-8');
-		$this->set_status ('200 OK');
+		$this->set_status (200, 'OK');
 		$this->redirect_to (null);
 		$this->headers = array();
 	}
@@ -36,19 +37,46 @@ class Response
 	}
 
 	/**
+	 * Returns Content-Type.
+	 */
+	public function get_content_type()
+	{
+		return $this->content_type;
+	}
+
+	/**
 	 * Sets HTTP status for response.
 	 */
-	public function set_status ($status_code, $message = '')
+	public function set_status ($code, $message = '')
 	{
-		$this->status = $status_code.' '.$message;
+		if (!is_integer ($code))
+			throw new ResponseException ("status code '{$code}' should be integer");
+		$this->status_code = $code;
+		$this->status_message = $message;
+	}
+
+	/**
+	 * Gets HTTP status.
+	 */
+	public function get_status_code()
+	{
+		return $this->status_code;
 	}
 
 	/**
 	 * Sets response content.
 	 */
-	public function set_content ($content)
+	public function set_body ($body)
 	{
-		$this->content = $content;
+		$this->body = $body;
+	}
+
+	/**
+	 * Gets response content.
+	 */
+	public function get_body()
+	{
+		return $this->body;
 	}
 
 	/**
@@ -65,6 +93,14 @@ class Response
 	}
 
 	/**
+	 * Redirects to the same URL.
+	 */
+	public function reload()
+	{
+		$this->redirect_to (Fails::$request->url());
+	}
+
+	/**
 	 * \returns	redirection URL or null if not redirected.
 	 */
 	public function is_redirected()
@@ -78,13 +114,12 @@ class Response
 	public function fully_qualified_redirection_url()
 	{
 		$k = $this->redirection;
-		# If there is ':' in URL and it occurs before '?', it must be
-		# absolute URL:
+		# If there is ':' in URL it must be absolute URL:
 		$a = strpos ($this->redirection, ':');
-		if ($a !== false && $a < strpos ($this->redirection, '?'))
+		if ($a !== false)
 			return $this->redirection;
 		# Otherwise, prepend base URL:
-		return Fails::$request->fully_qualified_base_url().$this->redirection;
+		return Fails::$request->fully_qualified_base_url().'/'.ltrim ($this->redirection, '/');
 	}
 
 	/**
@@ -92,16 +127,64 @@ class Response
 	 */
 	public function answer()
 	{
+		# Microtime:
+		global $microtime_start;
+		list ($usec1, $sec1) = explode (' ', $microtime_start);
+		list ($usec2, $sec2) = explode (' ', microtime());
+		$run_time = ((float)$usec2 + (float)$sec2) - ((float)$usec1 + (float)$sec1);
+		$this->headers['X-Runtime'] = $run_time;
+		# Etagging:
+		if (Fails::$config->fails->auto_etagging === true && $this->status_code === 200 && $this->body !== '')
+		{
+			$this->headers['Etag'] = $this->etag_for ($this->body);
+			if (@Fails::$request->env['HTTP_IF_NONE_MATCH'] === $this->headers['Etag'])
+			{
+				$this->set_status (304, 'Not Modified');
+				$this->body = '';
+			}
+		}
+		# Caching:
+		if (Fails::$config->fails->prevent_caching === false)
+		{
+			$this->headers['Cache-Control'] = '';
+			$this->headers['Pragma'] = '';
+		}
+		# Content-Type:
 		header ('Content-Type: '.$this->content_type);
-		header ('Status: '.$this->status);
 		# Headers:
 		foreach ($this->headers as $header_name => $content)
 			header ($header_name.': '.$content);
 		# Redirection:
 		if ($this->is_redirected())
-			header ('Location: '.$this->fully_qualified_redirection_url());
-		# TODO set ETag and check if we should respons Not-Modified or respond with full body.
-		echo $this->content;
+		{
+			$r = $this->fully_qualified_redirection_url();
+			header ('Location: '.$r);
+			Fails::$logger->add (Logger::CLASS_INFO, 'Redirection to '.$r);
+		}
+		else
+		{
+			$r = $this->status_code.' '.$this->status_message;
+			header ('HTTP/1.1 '.$r);
+			Fails::$logger->add (Logger::CLASS_INFO, 'Response <'.$this->content_type.'> '.$r);
+		}
+		# Enable output compression? Careful not to compress two times, when it's enabled in php.ini:
+		$compression = Fails::$config->fails->output_compression && !ini_get('zlib.output_compression');
+		if ($compression)
+			ob_start ('ob_gzhandler');
+		# Write output:
+		echo $this->body;
+		# Flush compressed buffer:
+		if ($compression)
+			ob_end_flush();
+		Fails::$logger->add (Logger::CLASS_INFO, "Response sent\n\n");
+	}
+
+	/**
+	 * Returns ETag for given content.
+	 */
+	private function etag_for ($subject)
+	{
+		return md5 ($subject);
 	}
 }
 

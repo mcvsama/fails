@@ -1,7 +1,7 @@
 <?php # vim: set fenc=utf8 ts=4 sw=4:
 
 /**
- * Returns array dump in string.
+ * Returns array dump as string.
  *
  * \param	array
  * 			array to dump.
