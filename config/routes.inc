@@ -6,7 +6,7 @@ Fails::$router->connect ('index', '', array ('controller' => 'test', 'action' =>
 Fails::$router->with (array ('controller' => 'users'));
 Fails::$router->connect ('user',			'user/:user_id/:action',	array ('action' => 'show'));
 Fails::$router->connect ('user_show',		'user/:user_id/show');
-Fails::$router->end_with();
+Fails::$router->without();
 
 # Default route with lowest priority (at the end).
 # May be a security hole, you'll probably want to remove it.

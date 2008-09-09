@@ -10,7 +10,7 @@ function h ($string)
 {
 	if (is_null ($string))
 		return null;
-	return htmlentities ($string, ENT_QUOTES, 'UTF-8');
+	return htmlspecialchars ($string, ENT_QUOTES, 'UTF-8');
 }
 
 ?>

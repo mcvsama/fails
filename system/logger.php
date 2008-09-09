@@ -43,7 +43,8 @@ class Logger
 			;
 
 		# Write log message:
-		fwrite ($f, $datestr." | ".$_SERVER['REMOTE_ADDR']." | <$class> ".$message."\n");
+		$ip = isset ($_SERVER['REMOTE_ADDR'])? $_SERVER['REMOTE_ADDR'] : Fails::$request->env['REMOTE_ADDR'];
+		fwrite ($f, "$datestr | $ip | <$class> $message\n");
 
 		# Release lock:
 		flock ($f, LOCK_UN);
@@ -107,7 +108,7 @@ class Logger
 
 		$s = 'Exception: '.$e->getMessage()."\n";
 		$s .= "---- Backtrace ----\n";
-		$s .= $message->getTraceAsString();
+		$s .= $e->getTraceAsString();
 		$s .= "\n";
 		$s .= "---- Request dump ----\n";
 		# TODO Dump request: $request->inspect()

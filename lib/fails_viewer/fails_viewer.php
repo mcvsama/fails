@@ -30,7 +30,7 @@ class FailsViewer extends Viewer
 		'/%>/'		=> ")?>",
 		# <# translations #>: TODO
 		'/<#/'		=> "<?php echo t('",
-		'/#>/'		=> ")?>",
+		'/#>/'		=> "')?>",
 	);
 
 	/**

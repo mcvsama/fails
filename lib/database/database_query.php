@@ -40,7 +40,7 @@ class DatabaseQuery
 	 * Escapes string to insert into SQL string that may contain
 	 * characters that otherwise would be interpreted as eg. parameter bindings.
 	 */
-	public function e ($string)
+	public static function e ($string)
 	{
 		return str_replace (':', '::', $string);
 	}
@@ -63,7 +63,7 @@ class DatabaseQuery
 	{
 		if ($colons === '::')
 			return ':';
-		return $placeholders[$a? $a : $b];
+		return $placeholders[($a? $a : $b) - 1];
 	}
 }
 
@@ -88,7 +88,7 @@ class DatabaseQueryWithArray extends DatabaseQuery
 	 */
 	public function __construct ($sql, $parameters = array())
 	{
-		call_user_func_array (array (parent, '__construct'), array_merge (array ($sql), $parameters));
+		call_user_func_array (array ('parent', '__construct'), array_merge (array ($sql), $parameters));
 	}
 }
 

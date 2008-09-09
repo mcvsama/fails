@@ -4,6 +4,7 @@
 class Dispatcher
 {
 	public $logger;
+	public $anomalies;
 	public $session;
 	public $request;
 	public $response;
@@ -97,8 +98,8 @@ class Dispatcher
 			$e[] = 'Fails::$config->fails not set';
 		else
 		{
-			$properties = array ('render_exceptions', 'display_errors', 'auto_rendering', 'error_404_file', 'error_500_file');
-			$error_files = array ('error_404_file', 'error_500_file');
+			$properties = array ('render_exceptions', 'display_errors', 'auto_rendering', 'error_403_file', 'error_404_file', 'error_422_file', 'error_500_file');
+			$error_files = array ('error_403_file', 'error_404_file', 'error_422_file', 'error_500_file');
 
 			foreach (array_merge ($properties, $error_files) as $v)
 				if (!isset (Fails::$config->fails->$v))
@@ -127,9 +128,9 @@ class Dispatcher
 
 		set_magic_quotes_runtime (0);
 		ini_set ('arg_separator.output', '&amp;');
-		ini_set ('zlib.output_compression', Fails::$config->fails->output_compression);
 		ini_set ('display_errors', Fails::$config->fails->display_errors? 1 : 0);
 		ini_set ('log_errors', 1);
+		ini_set ('expose_php', 0);
 		ini_set ('session.name', Fails::$config->fails->session_id);
 		ini_set ('short_open_tag', 1);
 		ini_set ('default_charset', 'UTF-8');
@@ -148,8 +149,9 @@ class Dispatcher
 
 		Fails::$dispatcher = $this;
 
-		# Logger:
+		# Loggers:
 		Fails::$logger = $this->logger = new Logger (FAILS_ROOT.'/log/default.'.date('Y-m-d'));
+		Fails::$anomalies = $this->anomalies = new Logger (FAILS_ROOT.'/log/anomalies.'.date('Y-m-d'));
 
 		# Session:
 		Fails::$session = $this->session = new Session();
@@ -213,12 +215,17 @@ class Dispatcher
 			throw new MissingActionException ("couldn't find action '{$this->action_name}'");
 
 		# Call action:
+		$this->add_runtime_control_point();
 		$this->controller->do_action ($method_name);
+		$this->add_runtime_control_point();
 
 		# Set content for response, if something has been rendered:
-		$content_for_layout = $this->controller->content_for_layout();
-		if ($content_for_layout !== null)
-			$this->response->set_body ($content_for_layout);
+		$body = $this->controller->content_for_layout();
+		if ($body !== null)
+			$this->response->set_body ($body);
+
+		# Runtime:
+		$this->compute_runtime();
 
 		# Echo rendered result:
 		$this->response->answer();
@@ -277,10 +284,20 @@ class Dispatcher
 		}
 		else
 		{
-			if ($e instanceof RouteNotFoundException)
+			if ($e instanceof RouteNotFoundException || ($e instanceof StatusException && $e->status_code == 404))
 			{
 				$s = '404 Not found';
 				$f = FAILS_ROOT.'/public/'.Fails::$config->fails->error_404_file;
+			}
+			else if ($e instanceof StatusException && $e->status_code == 403)
+			{
+				$s = '403 Forbidden';
+				$f = FAILS_ROOT.'/public/'.Fails::$config->fails->error_403_file;
+			}
+			else if ($e instanceof StatusException && $e->status_code == 422)
+			{
+				$s = '422 Unprocessable Entity';
+				$f = FAILS_ROOT.'/public/'.Fails::$config->fails->error_422_file;
 			}
 			else
 			{
@@ -301,6 +318,40 @@ class Dispatcher
 		header ('Content-Type: text/html; charset=UTF-8');
 		echo "<h1>$header_html</h1>";
 		echo "<p>$content_html</p>";
+	}
+
+	private function add_runtime_control_point()
+	{
+		global $runtime_control_points;
+		$runtime_control_points[] = microtime();
+	}
+
+	private function compute_runtime()
+	{
+		global $runtime_control_points;
+		if (!is_array ($runtime_control_points))
+			die();
+		$runtimes = array();
+		for ($i = 1; $i < count ($runtime_control_points); ++$i)
+		{
+			list ($usec1, $sec1) = explode (' ', $runtime_control_points[$i-1]);
+			list ($usec2, $sec2) = explode (' ', $runtime_control_points[$i-0]);
+			$diff = ((float)$usec2 + (float)$sec2) - ((float)$usec1 + (float)$sec1);
+			$diff = round ($diff * 1000) / 1000.0;
+			$runtimes[] = $diff;
+		}
+		$total_runtime = 0;
+		foreach ($runtimes as $x)
+			$total_runtime += $x;
+		$percentages = array();
+		foreach ($runtimes as $x)
+			$percentages[] = round ($x / $total_runtime * 1000) / 10.0;
+		$s = array();
+		for ($i = 0; $i < count ($runtimes); ++$i)
+			$s[] = $runtimes[$i].'s/'.$percentages[$i].'%';
+		$runtime = $total_runtime.'s ('.join (', ', $s).')';
+		Fails::$logger->add (Logger::CLASS_INFO, 'Runtime: '.$runtime);
+		$this->response->set_header ('X-Runtime', $runtime);
 	}
 }
 

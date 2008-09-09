@@ -6,8 +6,8 @@ class Router implements DynamicMethod, CallCatcher
 	private $routes;
 	private $routes_by_name;
 
-	# Used for default params for 'with/end_with' block:
-	private $default_params;
+	# Used for default params for 'with/without' block:
+	private $default_params_stack;
 
 	/**
 	 * Ctor
@@ -16,7 +16,7 @@ class Router implements DynamicMethod, CallCatcher
 	{
 		$this->routes = array();
 		$this->routes_by_name = array();
-		$this->default_params = array();
+		$this->default_params_stack = array();
 	}
 
 	/**
@@ -56,7 +56,7 @@ class Router implements DynamicMethod, CallCatcher
 	{
 		if ($name !== null && array_key_exists ($name, $this->routes_by_name))
 			throw new DuplicateRouteException ($name);
-		$route = new Route ($name, $path, array_merge ($this->default_params, $params));
+		$route = new Route ($name, $path, array_merge ($this->current_default_params(), $params));
 		$this->routes[] = $route;
 		$this->routes_by_name[$name] = $route;
 	}
@@ -65,14 +65,25 @@ class Router implements DynamicMethod, CallCatcher
 	 */
 	public function with (array $params)
 	{
-		$this->default_params = $params;
+		$this->default_params_stack[] = array_merge ($this->current_default_params(), $params);
 	}
 
 	/**
 	 */
-	public function end_with()
+	public function without()
 	{
-		$this->default_params = array();
+		array_pop ($this->default_params_stack);
+	}
+
+	/**
+	 * Working around PHP's project decisions:
+	 */
+	private function current_default_params()
+	{
+		$x = end ($this->default_params_stack);
+		if (!$x)
+			$x = array();
+		return $x;
 	}
 
 	/**
@@ -270,7 +281,7 @@ class Route
 		$missing_parameters = array();
 		$used_parameters = array();
 		$p = array_merge ($this->params, $params);
-		$s = rtrim (Fails::$request->base_url(), '/');
+		$s = '';
 		foreach ($this->segments as $seg)
 		{
 			if ($seg->type == 'string')
@@ -299,7 +310,7 @@ class Route
 				$z[] = urlencode ($par_name).'='.urlencode ($params[$par_name]);
 			$s .= implode ('&', $z);
 		}
-		return $s;
+		return Fails::$request->fully_qualified_base_url().$s;
 	}
 
 	##

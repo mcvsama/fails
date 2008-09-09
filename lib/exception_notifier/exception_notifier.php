@@ -8,7 +8,7 @@ class ExceptionNotifier extends Library
 	{
 		$c = Fails::$config->exception_notifier;
 		$title = ($c->tag? '['.$c->tag.'] ' : '').get_class ($e);
-		$content = self::heading (get_class ($e))."\n".$e->getTraceAsString()."\n\n";
+		$content = self::heading (get_class ($e))."\n".capitalize ($e->getMessage())."\n\n".$e->getTraceAsString()."\n\n";
 		foreach (Fails::get_state() as $h => $c)
 			$content .= self::heading ($h)."\n".$c."\n\n";
 		foreach (self::mails() as $mail)

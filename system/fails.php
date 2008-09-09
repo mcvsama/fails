@@ -5,6 +5,7 @@ class Fails
 	public static $controller;
 	public static $dispatcher;
 	public static $logger;
+	public static $anomalies;
 	public static $request;
 	public static $response;
 	public static $router;

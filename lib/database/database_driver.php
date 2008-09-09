@@ -38,7 +38,14 @@ abstract class DatabaseDriver
 	 *
 	 * \returns	DatabaseResult object.
 	 */
-	abstract public function exec ($query);
+	abstract public function exec (DatabaseQuery $query);
+
+	/**
+	 * Returns current sequence value for given relation.
+	 * This should be equivalent to 'currval(sequence_name)' in PostgreSQL
+	 * or 'show table status'/auto_increment value-1 in MySQL.
+	 */
+	abstract public function sequence_value ($relation_name, $key_name);
 
 	/**
 	 * Converts object to SQL string value:
@@ -120,13 +127,13 @@ abstract class DatabaseDriver
 	 * \param	isolation_level
 	 * 			Transaction isolation level. See constants.
 	 */
-	public function begin ($isolation_level = self::READ_COMMITED)
+	public function begin ($isolation_level = DatabaseDriver::READ_COMMITED)
 	{
 		++$this->transaction_depth;
 		if ($this->transaction_depth == 1)
 		{
-			$this->query ('BEGIN');
-			$this->query ('SET TRANSACTION ISOLATION LEVEL '.$isolation_level);
+			$this->exec (new DatabaseQuery ('BEGIN'));
+			$this->exec (new DatabaseQuery ('SET TRANSACTION ISOLATION LEVEL '.$isolation_level));
 		}
 	}
 
@@ -139,7 +146,7 @@ abstract class DatabaseDriver
 	{
 		--$this->transaction_depth;
 		if ($this->transaction_depth == 0)
-			$this->query ('COMMIT');
+			$this->exec (new DatabaseQuery ('COMMIT'));
 	}
 
 	/**
@@ -151,7 +158,7 @@ abstract class DatabaseDriver
 	{
 		--$this->transaction_depth;
 		if ($this->transaction_depth == 0)
-			$this->query ('ROLLBACK');
+			$this->exec (new DatabaseQuery ('ROLLBACK'));
 	}
 
 	##

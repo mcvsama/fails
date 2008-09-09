@@ -127,12 +127,6 @@ class Response
 	 */
 	public function answer()
 	{
-		# Microtime:
-		global $microtime_start;
-		list ($usec1, $sec1) = explode (' ', $microtime_start);
-		list ($usec2, $sec2) = explode (' ', microtime());
-		$run_time = ((float)$usec2 + (float)$sec2) - ((float)$usec1 + (float)$sec1);
-		$this->headers['X-Runtime'] = $run_time;
 		# Etagging:
 		if (Fails::$config->fails->auto_etagging === true && $this->status_code === 200 && $this->body !== '')
 		{

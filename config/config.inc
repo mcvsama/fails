@@ -13,7 +13,7 @@ Fails::$config->fails->base_url = null;
 Fails::$config->fails->render_exceptions = false;
 
 # Whether to display PHP errors (warnings/notices/etc):
-Fails::$config->fails->display_errors = true;
+Fails::$config->fails->display_errors = false;
 
 # Error reporting threshold:
 Fails::$config->fails->display_errors_threshold = E_ALL;
@@ -22,7 +22,9 @@ Fails::$config->fails->display_errors_threshold = E_ALL;
 Fails::$config->fails->auto_rendering = false;
 
 # Error pages:
+Fails::$config->fails->error_403_file = 'error-403.html';
 Fails::$config->fails->error_404_file = 'error-404.html';
+Fails::$config->fails->error_422_file = 'error-422.html';
 Fails::$config->fails->error_500_file = 'error-500.html';
 
 # Whether to enable no-cache headers:
@@ -32,7 +34,7 @@ Fails::$config->fails->prevent_caching = false;
 Fails::$config->fails->auto_etagging = true;
 
 # Output compression:
-Fails::$config->fails->output_compression = true;
+Fails::$config->fails->output_compression = false;
 
 require 'exception_notifier.inc';
 

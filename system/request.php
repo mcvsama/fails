@@ -22,6 +22,8 @@ class Request
 		$this->p = $_POST;
 		$this->env = $_SERVER;
 
+		Fails::$logger->add (Logger::CLASS_INFO, 'Request '.$this->env['REQUEST_METHOD'].' '.$this->env['REQUEST_URI']);
+
 		unset ($_GET);
 		unset ($_POST);
 		unset ($_SERVER);
@@ -56,7 +58,7 @@ class Request
 	}
 
 	/**
-	 * Returns base URL for this Fails installation.
+	 * Returns base URL for this Fails installation without trailing '/'.
 	 */
 	public function base_url()
 	{
@@ -64,11 +66,11 @@ class Request
 	}
 
 	/**
-	 * Returns fully qualified base URL.
+	 * Returns fully qualified base URL without trailing '/'.
 	 */
 	public function fully_qualified_base_url()
 	{
-		return $this->protocol().$this->env['SERVER_NAME'].$this->base_url();
+		return rtrim ($this->protocol().$this->env['SERVER_NAME'].$this->base_url(), '/');
 	}
 
 	/**
@@ -211,7 +213,7 @@ class Request
 		$regex = preg_quote ($this->base_url(), '/').'([^\?]*)(\?.*)?';
 		preg_match ('/^'.$regex.'$/', $this->env['REQUEST_URI'], $out);
 		# Extract route string from REQUEST_URI:
-		$this->route_string = trim ($out[1], '/');
+		$this->route_string = @trim ($out[1], '/');
 	}
 }
 

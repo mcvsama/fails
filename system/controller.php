@@ -11,7 +11,7 @@ class Controller implements DynamicMethod, CallCatcher
 	public $session;
 
 	# Merged params from GET/POST and Router:
-	protected $params;
+	public $params;
 
 	# Object holding variables meant to be passed to view:
 	protected $set;
@@ -206,6 +206,7 @@ class Controller implements DynamicMethod, CallCatcher
 	 */
 	protected function render_file ($file_name, $layout = false, $status = null)
 	{
+		Fails::$logger->add (Logger::CLASS_INFO, "Rendering file: $file_name");
 		# Load template file:
 		$content = @file_get_contents ($file_name);
 		if ($content === false)
@@ -230,7 +231,7 @@ class Controller implements DynamicMethod, CallCatcher
 	 */
 	protected function render_nothing()
 	{
-		$this->render_text (null);
+		$this->render_text (null, false);
 		$this->stop_autorender = true;
 	}
 
@@ -238,7 +239,7 @@ class Controller implements DynamicMethod, CallCatcher
 	 * This is main rendering method. All other methods end up calling this (directly or indirectly).
 	 *
 	 * \param	text
-	 * 			Text to render.
+	 * 			Text to render or null to render nothing.
 	 *
 	 * Other parameters as in render_action().
 	 */

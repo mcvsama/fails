@@ -55,7 +55,7 @@ class PostgreSQLDriver extends DatabaseDriver
 	 * \throws	InvalidArguments
 	 * 			if parameter is not DatabaseQuery.
 	 */
-	public function exec ($query)
+	public function exec (DatabaseQuery $query)
 	{
 		$this->queries_count += 1;
 
@@ -72,9 +72,19 @@ class PostgreSQLDriver extends DatabaseDriver
 	}
 
 	/**
+	 * Implementation of DatabaseDriver::sequence_value().
+	 */
+	public function sequence_value ($relation_name, $key_name)
+	{
+		$default_sequence_name = $relation_name.'_'.$key_name.'_seq';
+		$r = $this->exec (new DatabaseQuery ("SELECT currval(:1) AS sequence_value", $default_sequence_name));
+		return $r[0]['sequence_value'];
+	}
+
+	/**
 	 * Creates new placeholder names and parameters array
 	 * to look like '$1 … $2 … $3' and ['val1', 'val2', 'val3'].
-	 * For private use only, although it must be public!
+	 * For private use only, tho it must be public!
 	 */
 	public function transform_placeholders (array $bindings)
 	{
@@ -123,7 +133,7 @@ class PostgreSQLDriver extends DatabaseDriver
 	/**
 	 * Implementation of DatabaseDriver::escape_relation_name().
 	 */
-	public function escape_relation_name ($string)
+	public function escape_relation_name ($relation_name)
 	{
 		return '"'.addslashes ($relation_name).'"';
 	}

@@ -1,9 +1,13 @@
 <?php # vim: set fenc=utf8 ts=4 sw=4:
 
 require 'exception.php';
+require 'active_record_base.php';
+require 'active_record_errors.php';
 
 class ActiveRecord implements ArrayAccess
 {
+	const PRIMARY_KEY = 'id';
+
 	# Internals object:
 	protected $_;
 
@@ -32,7 +36,7 @@ class ActiveRecord implements ArrayAccess
 	 */
 	public function __construct (array $attributes_map = null, Database $db = null)
 	{
-		$this->_ = new stdclass();
+		$this->_ = new ActiveRecordBase();
 		$this->_->new_record = true;
 
 		# Database connection:
@@ -48,10 +52,10 @@ class ActiveRecord implements ArrayAccess
 		}
 
 		# Relation info:
-		$this->_->relation_name = Inflector::underscore (get_class ($this));
+		$this->_->relation_name = Inflector::pluralize (Inflector::underscore (get_class ($this)));
 		$db_dump = $this->_->db->dump_relations();
 		if (!isset ($db_dump[$this->_->relation_name]))
-			throw new RelationDoesNotExistException ("database says that relation '{$this->_->relation_name}' for model '".get_class ($this)."' does not exist");
+			throw new RelationDoesNotExistException ($this, "database says that relation '{$this->_->relation_name}' for model '".get_class ($this)."' does not exist");
 		$this->_->relation_info = $db_dump[$this->_->relation_name];
 
 		# Attributes:
@@ -69,6 +73,9 @@ class ActiveRecord implements ArrayAccess
 
 		# Backup original attributes values:
 		$this->_->original_attributes = $this->_->attributes;
+
+		# Errors object:
+		$this->_->errors = new ActiveRecordErrors ($this);
 	}
 
 	/**
@@ -76,7 +83,7 @@ class ActiveRecord implements ArrayAccess
 	 */
 	public static function create_from_row (array $attributes_map = null, Database $db = null)
 	{
-		#$ar = new ...?
+		$base = new ActiveRecordBase();
 	}
 
 	##
@@ -152,19 +159,174 @@ class ActiveRecord implements ArrayAccess
 			$this->$k = $v;
 	}
 
+	/**
+	 * Returns true if record is singular (does not
+	 * exist in database).
+	 */
 	public function new_record()
 	{
 		return $this->_->new_record;
 	}
 
+	/**
+	 * Returns true if any of record's attributes
+	 * have been changed.
+	 */
 	public function changed()
 	{
+		if ($this->new_record())
+			return true;
 		foreach ($this->_->original_attributes as $a => $v)
 			if ($this[$a] !== $v)
 				return true;
 		return false;
 	}
 
+	/**
+	 * Used for data validation.
+	 * To be overridden in child class.
+	 */
+	protected function validation (ActiveRecordErrors $errors)
+	{ }
+
+	/**
+	 * Runs validation and returns true if object is valid.
+	 */
+	public function validate()
+	{
+		$this->_->errors = new ActiveRecordErrors ($this);
+		$this->validation ($this->_->errors);
+		if ($this->_->errors->has_errors())
+			throw new ActiveRecordInvalidException ($this);
+	}
+
+	/**
+	 * Runs validation and returns true if object is valid.
+	 */
+	public function valid()
+	{
+		try { $this->valid(); }
+		catch (ActiveRecordInvalidException $exception)
+		{ return false; }
+		return true;
+	}
+
+	/**
+	 * Returns errors object.
+	 */
+	public function errors()
+	{
+		return $this->_->errors;
+	}
+
+	/**
+	 * \throws	ActiveRecordInvalidException
+	 * 			when validation fails.
+	 */
+	public function save()
+	{
+		if ($this->new_record())
+			return $this->insert();
+		return $this->update();
+	}
+
+	/**
+	 * \returns	false if validation fails, true otherwise.
+	 */
+	public function quiet_save()
+	{
+		try { $this->save(); }
+		catch (ActiveRecordInvalidException $exception)
+		{ return false; }
+		return true;
+	}
+
+	/**
+	 * Inserts record as new tuple into relation.
+	 *
+	 * \returns	$this for chaining.
+	 *
+	 * \throws	ActiveRecordInvalidException
+	 * 			when validation fails.
+	 */
+	public function insert()
+	{
+		# Validation:
+		$this->validate();
+		# Create SQL:
+		$relation = DatabaseQuery::e ($this->_->db->escape_relation_name ($this->_->relation_name));
+		$n = 0;
+		$integers = $attributes = $values = array();
+		foreach ($this->_->attributes as $name => $value)
+			if ($name !== ActiveRecord::PRIMARY_KEY) # Skip PRIMARY KEY
+			{
+				$integers[] = ++$n;
+				$attributes[] = DatabaseQuery::e ($name);
+				$values[] = $this[$name];
+			}
+		$sql = "INSERT INTO $relation (".join (', ', $attributes).") VALUES (:".join (', :', $integers).")";
+		$this->_->db->exec (new DatabaseQueryWithArray ($sql, $values));
+		# Get ID:
+		$this[ActiveRecord::PRIMARY_KEY] = $this->_->db->sequence_value ($this->_->relation_name, ActiveRecord::PRIMARY_KEY);
+		# Change state and backup attributes:
+		$this->_->new_record = false;
+		$this->_->original_attributes = $this->_->attributes;
+		# Chaining:
+		return $this;
+	}
+
+	/**
+	 * Updates existing record in database.
+	 *
+	 * \returns	$this for chaining.
+	 *
+	 * \throws	ActiveRecordInvalidException
+	 * 			when validation fails.
+	 * \throws	ActiveRecordStateException
+	 * 			when trying to update new record.
+	 */
+	public function update()
+	{
+		# Can't update new record:
+		if ($this->new_record())
+			throw new ActiveRecordStateException ($this);
+		# Skip if record not changed:
+		if (!$this->changed())
+			return $this;
+		# Validation:
+		$this->validate();
+		# Create SQL:
+		$relation = DatabaseQuery::e ($this->_->db->escape_relation_name ($this->_->relation_name));
+		$n = 0;
+		$pairs = $attributes = $values = array();
+		foreach ($this->_->attributes as $name => $value)
+			if ($this[$name] !== $this->_->original_attributes[$name]) # Attribute changed?
+			{
+				$pairs[] = DatabaseQuery::e ($name).' = :'.++$n;
+				$attributes[] = DatabaseQuery::e ($name);
+				$values[] = $this[$name];
+			}
+		$values[] = $this->id;
+		$this->_->db->exec (new DatabaseQueryWithArray ("UPDATE $relation SET ".join (', ', $pairs)." WHERE ".ActiveRecord::PRIMARY_KEY." = :".++$n, $values));
+		# Backup attributes:
+		$this->_->original_attributes = $this->_->attributes;
+		# For chaining:
+		return $this;
+	}
+
+	public function create (array $attributes_map = null)
+	{
+		# TODO
+	}
+
+	public function destroy()
+	{
+		# TODO
+	}
+
+	# create
+	# destroy
+	#
 	# Narpiew before-save, potem before-create/before-update
 	# before-save
 	# after-save
@@ -183,16 +345,9 @@ class ActiveRecord implements ArrayAccess
 	#
 	# after-find
 	#
-	# save
-	# insert
-	# update
-	# create
-	# destroy
-	#
-	# validate
-	#
 	# static destroy (by-id)
 	# find (by-id)
+	# find_or_create
 
 	##
 	## ArrayAccess
@@ -237,7 +392,7 @@ class ActiveRecord implements ArrayAccess
 	 */
 	public function offsetUnset ($offset)
 	{
-		throw new InvalidOperation ("can't unset ActiveRecord's attribute");
+		throw new InvalidOperationException ("can't unset ActiveRecord's attribute");
 	}
 
 	##
@@ -248,6 +403,16 @@ class ActiveRecord implements ArrayAccess
 	{
 		if (!array_key_exists ($name, $this->_->original_attributes))
 			throw new InvalidAttributeNameException ($this, $name);
+	}
+}
+
+# TODO for testing, to remove:
+class User extends ActiveRecord
+{
+	public function validation ($errors)
+	{
+		$errors->validate_as_nonblank ('username');
+		$errors->validate_as_nonblank ('password');
 	}
 }
 

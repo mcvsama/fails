@@ -18,13 +18,33 @@ class MethodMissingException extends Exception
 }
 
 
+class ArgumentException extends Exception
+{
+}
+
+
 class UnimplementedException extends Exception
 {
 }
 
 
-class InvalidOperation extends Exception
+class InvalidOperationException extends Exception
 {
+}
+
+
+class StatusException extends Exception
+{
+	public $status_code;
+	public $status_message;
+
+	public function __construct ($status_code, $status_message = null)
+	{
+		parent::__construct ("status: $status_code");
+
+		$this->status_code = $status_code;
+		$this->status_message = $status_message;
+	}
 }
 
 ##
