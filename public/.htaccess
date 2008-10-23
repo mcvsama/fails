@@ -1,4 +1,13 @@
+AddDefaultCharset UTF-8
+
 AddType application/x-httpd-php .inc
+AddType text/javascript .js
+AddType text/css .css
+AddCharset UTF-8 .js
+AddCharset UTF-8 .css
+AddCharset UTF-8 .php
+AddCharset UTF-8 .inc
+
 PHP_Flag magic_quotes_gpc off
 
 RewriteEngine On

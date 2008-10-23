@@ -80,10 +80,11 @@ class ActiveRecord implements ArrayAccess
 
 	/**
 	 * Creates nonsingular (existing in database) object.
+	 * Attributes map are setup without using setters.
 	 */
 	public static function create_from_row (array $attributes_map = null, Database $db = null)
 	{
-		$base = new ActiveRecordBase();
+		# TODO $record = new ...
 	}
 
 	##
@@ -191,6 +192,8 @@ class ActiveRecord implements ArrayAccess
 
 	/**
 	 * Runs validation and returns true if object is valid.
+	 * \throws	ActiveRecordInvalidException
+	 * 			on errors.
 	 */
 	public function validate()
 	{
@@ -314,19 +317,23 @@ class ActiveRecord implements ArrayAccess
 		return $this;
 	}
 
+	/**
+	 * Creates object from given attributes and saves
+	 * it to database with save() method.
+	 */
 	public function create (array $attributes_map = null)
 	{
 		# TODO
 	}
 
+	/**
+	 * Destroys object in database.
+	 */
 	public function destroy()
 	{
 		# TODO
 	}
 
-	# create
-	# destroy
-	#
 	# Narpiew before-save, potem before-create/before-update
 	# before-save
 	# after-save

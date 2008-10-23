@@ -1,6 +1,6 @@
 <?php # vim: set fenc=utf8 ts=4 sw=4:
 
-abstract class DatabaseResult implements ArrayAccess, Iterator
+abstract class DatabaseResult implements ArrayAccess, Countable, Iterator
 {
 	private $size;
 	private $position;
@@ -160,6 +160,11 @@ abstract class DatabaseResult implements ArrayAccess, Iterator
 	public function rewind()
 	{
 		$this->position = 0;
+	}
+
+	public function count()
+	{
+		return $this->size;
 	}
 
 	public function valid()

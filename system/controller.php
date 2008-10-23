@@ -255,6 +255,8 @@ class Controller implements DynamicMethod, CallCatcher
 		else
 		{
 			$this->content_for['action'] = $text;
+			if (method_exists ($this, 'before_layout'))
+				$this->before_layout ($layout);
 			return $this->content_for['layout'] = $this->render_template ('layouts/'.$layout, false, $status);
 		}
 	}

@@ -71,6 +71,7 @@ class Dispatcher
 	 */
 	private function load_system_files()
 	{
+		# TODO Caching loaded files. Barrier is mtime of file list (FUNCTIONS, CLASSES, …)
 		# Load system functions:
 		$this->require_files_from_list (FAILS_ROOT.'/system/functions/FUNCTIONS');
 		# Load system classes:
@@ -272,7 +273,10 @@ class Dispatcher
 	{
 		if (Fails::$config->fails->render_exceptions)
 		{
-			header ('Status: 500 Internal server error: uncaught exception');
+			$s = '500 Internal server error';
+			if ($e instanceof StatusException)
+				$s = $e->status_code.' '.$e->getMessage();
+			header ('HTTP/1.1 '.$s);
 			header ('Content-Type: text/html; charset=UTF-8');
 			$v = @file_get_contents (FAILS_ROOT.'/system/views/exception.php');
 			if ($v === false)
@@ -305,7 +309,7 @@ class Dispatcher
 				$f = FAILS_ROOT.'/public/'.Fails::$config->fails->error_500_file;
 			}
 
-			header ('Status: '.$s);
+			header ('HTTP/1.1 '.$s);
 			header ('Content-Type: text/html; charset=UTF-8');
 
 			# File existence has been asserted in check_config().
@@ -349,7 +353,7 @@ class Dispatcher
 		$s = array();
 		for ($i = 0; $i < count ($runtimes); ++$i)
 			$s[] = $runtimes[$i].'s/'.$percentages[$i].'%';
-		$runtime = $total_runtime.'s ('.join (', ', $s).')';
+		$runtime = $total_runtime.'s = '.(round (1.0 / $total_runtime * 10) / 10). ' reqs/sec ('.join (', ', $s).')';
 		Fails::$logger->add (Logger::CLASS_INFO, 'Runtime: '.$runtime);
 		$this->response->set_header ('X-Runtime', $runtime);
 	}
