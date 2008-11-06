@@ -178,6 +178,14 @@ class Request
 		return $this->env['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest';
 	}
 
+	/**
+	 * Synonym to is_async.
+	 */
+	public function is_xhr()
+	{
+		return $this->is_async();
+	}
+
 	##
 	## Privates
 	##

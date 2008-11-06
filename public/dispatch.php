@@ -2,7 +2,7 @@
 
 $runtime_control_points = array (microtime());
 
-define ('FAILS_ROOT', realpath (dirname ($_SERVER['SCRIPT_FILENAME']).'/..'));
+define ('FAILS_ROOT', realpath (dirname (__FILE__).'/..'));
 
 require_once FAILS_ROOT.'/system/dispatcher.php';
 

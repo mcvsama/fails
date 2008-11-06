@@ -9,11 +9,17 @@ class Session implements ArrayAccess
 	 */
 	public function __construct()
 	{
-		$sn = Fails::$config->fails->session_id;
+		$sn = Fails::$config->fails->session->id;
 		if (!is_string ($sn) || is_blank ($sn))
-			throw new SecurityException ('session identifier not set: $config->fails->session_id');
-		session_start();
+			throw new SecurityException ('session identifier not set: $config->fails->session->id');
+		@session_set_cookie_params (
+			coalesce (Fails::$config->fails->session->timeout, 3600),
+			coalesce (Fails::$config->fails->session->path, '/'),
+			coalesce (Fails::$config->fails->session->domain),
+			coalesce (Fails::$config->fails->session->secure, false)
+		);
 		session_name ($sn);
+		session_start();
 		$this->vars = &$_SESSION;
 		unset ($_SESSION);
 	}

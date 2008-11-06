@@ -132,9 +132,9 @@ class Dispatcher
 		ini_set ('display_errors', Fails::$config->fails->display_errors? 1 : 0);
 		ini_set ('log_errors', 1);
 		ini_set ('expose_php', 0);
-		ini_set ('session.name', Fails::$config->fails->session_id);
 		ini_set ('short_open_tag', 1);
 		ini_set ('default_charset', 'UTF-8');
+		ini_set ('session.name', Fails::$config->fails->session->id);
 		error_reporting (Fails::$config->fails->display_errors_threshold);
 
 		# Unset deprecated superglobals:
@@ -277,8 +277,16 @@ class Dispatcher
 			if ($e instanceof StatusException)
 				$s = $e->status_code.' '.$e->getMessage();
 			header ('HTTP/1.1 '.$s);
-			header ('Content-Type: text/html; charset=UTF-8');
-			$v = @file_get_contents (FAILS_ROOT.'/system/views/exception.php');
+			if ($this->request->is_xhr())
+			{
+				header ('Content-Type: text/plain; charset=UTF-8');
+				$v = @file_get_contents (FAILS_ROOT.'/system/views/exception_xhr.php');
+			}
+			else
+			{
+				header ('Content-Type: text/html; charset=UTF-8');
+				$v = @file_get_contents (FAILS_ROOT.'/system/views/exception.php');
+			}
 			if ($v === false)
 				throw new Exception ('internal error: could not load exception view');
 			$r = eval ("?>$v<?php ");
@@ -355,7 +363,8 @@ class Dispatcher
 			$s[] = $runtimes[$i].'s/'.$percentages[$i].'%';
 		$runtime = $total_runtime.'s = '.(round (1.0 / $total_runtime * 10) / 10). ' reqs/sec ('.join (', ', $s).')';
 		Fails::$logger->add (Logger::CLASS_INFO, 'Runtime: '.$runtime);
-		$this->response->set_header ('X-Runtime', $runtime);
+		if (Fails::$config->fails->debug_info === true)
+			$this->response->set_header ('X-Runtime', $runtime);
 	}
 }
 
