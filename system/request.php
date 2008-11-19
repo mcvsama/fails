@@ -175,7 +175,7 @@ class Request
 	 */
 	public function is_async()
 	{
-		return $this->env['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest';
+		return @$this->env['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest';
 	}
 
 	/**
@@ -221,7 +221,7 @@ class Request
 		$regex = preg_quote ($this->base_url(), '/').'([^\?]*)(\?.*)?';
 		preg_match ('/^'.$regex.'$/', $this->env['REQUEST_URI'], $out);
 		# Extract route string from REQUEST_URI:
-		$this->route_string = @trim ($out[1], '/');
+		$this->route_string = @trim (urldecode ($out[1]), '/');
 	}
 }
 

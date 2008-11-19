@@ -285,7 +285,7 @@ class Route
 		foreach ($this->segments as $seg)
 		{
 			if ($seg->type == 'string')
-				$s .= '/'.$seg->value;
+				$s .= '/'.urlencode ($seg->value);
 			else if ($seg->type == 'param')
 			{
 				if (isset ($p[$seg->name]))
