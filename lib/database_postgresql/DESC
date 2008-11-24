@@ -1,0 +1,33 @@
+SELECT a.attname, format_type(a.atttypid, a.atttypmod), d.adsrc, a.attnotnull
+ FROM pg_attribute a LEFT JOIN pg_attrdef d
+ ON a.attrelid = d.adrelid AND a.attnum = d.adnum
+ WHERE a.attrelid = '!!!!!lowercase_table_name_of_interest!!!!!'::regclass
+ AND a.attnum > 0 AND NOT a.attisdropped
+ ORDER BY a.attnum;
+
+     attname      |         format_type         |               adsrc               | attnotnull
+-------------------+-----------------------------+-----------------------------------+------------
+ id                | integer                     | nextval('users_id_seq'::regclass) | t
+ username          | character varying(64)       |                                   | t
+ password          | character varying(64)       |                                   | t
+ root              | boolean                     | false                             | t
+ fname             | character varying(64)       |                                   | f
+ lname             | character varying(64)       |                                   | f
+ sex               | character(1)                |                                   | f
+ birthdate         | date                        |                                   | f
+ city              | character varying(64)       |                                   | f
+ country           | text                        |                                   | f
+ timezone          | text                        |                                   | f
+ language          | text                        |                                   | f
+ writing_language  | text                        |                                   | f
+ summary           | text                        |                                   | f
+ signature         | text                        |                                   | f
+ homepage          | character varying(256)      |                                   | f
+ avatar_id         | integer                     |                                   | f
+ created_at        | timestamp without time zone |                                   | t
+ group_id          | integer                     |                                   | f
+ pref_audio_player | integer                     |                                   | f
+ pref_video_player | integer                     |                                   | f
+ pref_image_viewer | integer                     |                                   | f
+(22 rows)
+

@@ -1,0 +1,2 @@
+LAST_INSERT_ID: SHOW TABLE STATUS LIKE 'your_table'
+Wybierz z tego atrybut 'Auto_increment';
