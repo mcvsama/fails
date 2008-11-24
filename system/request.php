@@ -54,7 +54,9 @@ class Request
 	 */
 	public function url()
 	{
-		return $this->fully_qualified_base_url().'/'.$this->route_string().'?'.$this->query_string();
+		if ($qs = $this->query_string())
+			$qs = '?'.$qs;
+		return $this->fully_qualified_base_url().'/'.$this->route_string().$qs;
 	}
 
 	/**

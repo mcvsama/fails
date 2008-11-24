@@ -26,6 +26,7 @@ class ExceptionNotifier extends Library
 
 	private static function heading ($string)
 	{
+		# Can't use str_pad, it does not support Unicode.
 		$k = '';
 		$n = strlen ($string);
 		for ($i = 0; $i < $n; ++$i)

@@ -21,6 +21,7 @@ class Fails
 		$r = array();
 		if (Fails::$request !== null)
 		{
+			$r['Full URL'] = Fails::$request->url()
 			$r['Pre-routing GET parameters'] = array_to_string (Fails::$request->g);
 			$r['Pre-routing POST parameters'] = array_to_string (Fails::$request->p);
 		}
@@ -28,8 +29,19 @@ class Fails
 			$r['Post-routing parameters'] = array_to_string (Fails::$dispatcher->merged_params);
 		if (Fails::$session !== null)
 			$r['Session dump'] = array_to_string (Fails::$session->get_all());
+		# Environment hash should be pretty:
 		if (Fails::$request !== null)
-			$r['Environment'] = array_to_string (Fails::$request->env);
+		{
+			$max = 0;
+			foreach (Fails::$request->env as $n => $v)
+				if (strlen ($n) > $max)
+					$max = strlen ($n);
+			$max = max ($max, 25);
+			$s = '';
+			foreach (Fails::$request->env as $n => $v)
+				$s .= str_pad ($n, $max)." => ".trim ($v)."\n";
+			$r['Environment'] = trim ($s);
+		}
 		return $r;
 	}
 
