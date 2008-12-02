@@ -8,9 +8,7 @@ require 'database_result.php';
 class Database
 {
 	# Map of named database connections:
-	public static $connections;
+	public static $connections = array();
 }
-
-Database::$connections = array();
 
 ?>

@@ -2,7 +2,7 @@
 
 class ActiveRecordBase
 {
-	public $new_record;
+	public $is_new;
 	public $db;
 	public $relation_name;
 	public $relation_info;

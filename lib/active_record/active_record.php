@@ -4,6 +4,14 @@ require 'exception.php';
 require 'active_record_base.php';
 require 'active_record_errors.php';
 
+# TODO przeanalizuj zwykłe metody: http://api.rubyonrails.org/classes/ActiveRecord/Base.html
+# TODO przeanalizuj związki: http://api.rubyonrails.org/classes/ActiveRecord/Associations/ClassMethods.html
+# TODO też poczytaj o „Eager loading”
+# set_primary_key
+# set_sequence_name
+# set_table_name
+# toggle(attribute)
+
 class ActiveRecord implements ArrayAccess
 {
 	const PRIMARY_KEY = 'id';
@@ -37,7 +45,7 @@ class ActiveRecord implements ArrayAccess
 	public function __construct (array $attributes_map = null, Database $db = null)
 	{
 		$this->_ = new ActiveRecordBase();
-		$this->_->new_record = true;
+		$this->_->is_new = true;
 
 		# Database connection:
 		$this->_->db = $db;
@@ -151,6 +159,14 @@ class ActiveRecord implements ArrayAccess
 	##
 
 	/**
+	 * Returns DB connection used by this model.
+	 */
+	public function connection()
+	{
+		# TODO
+	}
+
+	/**
 	 * Updates attributes, but only those which are present
 	 * in attributes_map.
 	 */
@@ -164,9 +180,9 @@ class ActiveRecord implements ArrayAccess
 	 * Returns true if record is singular (does not
 	 * exist in database).
 	 */
-	public function new_record()
+	public function is_new()
 	{
-		return $this->_->new_record;
+		return $this->_->is_new;
 	}
 
 	/**
@@ -175,7 +191,7 @@ class ActiveRecord implements ArrayAccess
 	 */
 	public function changed()
 	{
-		if ($this->new_record())
+		if ($this->is_new())
 			return true;
 		foreach ($this->_->original_attributes as $a => $v)
 			if ($this[$a] !== $v)
@@ -228,7 +244,7 @@ class ActiveRecord implements ArrayAccess
 	 */
 	public function save()
 	{
-		if ($this->new_record())
+		if ($this->is_new())
 			return $this->insert();
 		return $this->update();
 	}
@@ -272,7 +288,7 @@ class ActiveRecord implements ArrayAccess
 		# Get ID:
 		$this[ActiveRecord::PRIMARY_KEY] = $this->_->db->sequence_value ($this->_->relation_name, ActiveRecord::PRIMARY_KEY);
 		# Change state and backup attributes:
-		$this->_->new_record = false;
+		$this->_->is_new = false;
 		$this->_->original_attributes = $this->_->attributes;
 		# Chaining:
 		return $this;
@@ -291,7 +307,7 @@ class ActiveRecord implements ArrayAccess
 	public function update()
 	{
 		# Can't update new record:
-		if ($this->new_record())
+		if ($this->is_new())
 			throw new ActiveRecordStateException ($this);
 		# Skip if record not changed:
 		if (!$this->changed())

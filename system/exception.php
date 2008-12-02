@@ -95,6 +95,18 @@ class MissingActionException extends Exception
 }
 
 ##
+## Controller exceptions
+##
+
+class DoubleRenderException extends Exception
+{
+	public function __construct()
+	{
+		parent::__construct ("can only render or redirect once per action");
+	}
+}
+
+##
 ## Router exceptions
 ##
 

@@ -206,6 +206,8 @@ class Controller implements DynamicMethod, CallCatcher
 	 */
 	protected function render_file ($file_name, $layout = false, $status = null)
 	{
+		if ($this->response->is_redirected())
+			throw new DoubleRenderException();
 		Fails::$logger->add (Logger::CLASS_INFO, "Rendering file: $file_name");
 		# Load template file:
 		$content = @file_get_contents ($file_name);

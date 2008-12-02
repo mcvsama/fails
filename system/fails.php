@@ -21,7 +21,7 @@ class Fails
 		$r = array();
 		if (Fails::$request !== null)
 		{
-			$r['Full URL'] = Fails::$request->url()
+			$r['Full URL'] = Fails::$request->url();
 			$r['Pre-routing GET parameters'] = array_to_string (Fails::$request->g);
 			$r['Pre-routing POST parameters'] = array_to_string (Fails::$request->p);
 		}
