@@ -53,7 +53,7 @@ class Cache implements ArrayAccess
 	 */
 	private function prepare_offset ($offset)
 	{
-		return $this->directory_name.'/'.escape_filename ($offset);
+		return $this->directory_name.'/'.escape_filename ($offset).'.cache';
 	}
 }
 
