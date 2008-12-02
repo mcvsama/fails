@@ -7,15 +7,6 @@ abstract class Viewer implements CallCatcher
 	 */
 	abstract public function process();
 
-	/**
-	 * TODO opis
-	 * To be called only from within a view.
-	 */
-	public function render_partial ($partial_name, array $locals = array(), $layout = null, $status = null)
-	{
-		# TODO
-	}
-
 	##
 	## Interface CallCatcher
 	##

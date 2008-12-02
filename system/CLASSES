@@ -1,6 +1,7 @@
 interfaces/call_catcher
 interfaces/dynamic_method
 bind
+cache
 controller
 dispatcher
 exception

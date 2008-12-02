@@ -9,6 +9,7 @@ class Dispatcher
 	public $request;
 	public $response;
 	public $router;
+	public $cache;
 
 	# Controller and action names:
 	public $controller_name;
@@ -156,6 +157,9 @@ class Dispatcher
 
 		# Session:
 		Fails::$session = $this->session = new Session();
+
+		# Cache:
+		Fails::$cache = $this->cache = new Cache (FAILS_ROOT.'/tmp/cache');
 
 		# Request:
 		Fails::$request = $this->request = new Request();

@@ -11,6 +11,7 @@ class Fails
 	public static $router;
 	public static $session;
 	public static $config;
+	public static $cache;
 
 	/**
 	 * Returns Fails main state information
