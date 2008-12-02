@@ -9,6 +9,7 @@ class Controller implements DynamicMethod, CallCatcher
 	public $response;
 	public $router;
 	public $session;
+	public $cache;
 
 	# Merged params from GET/POST and Router:
 	public $params;
@@ -51,6 +52,7 @@ class Controller implements DynamicMethod, CallCatcher
 		$this->response		= Fails::$response;
 		$this->router		= Fails::$router;
 		$this->controller	= Fails::$controller;
+		$this->cache		= Fails::$cache;
 	}
 
 	public function do_action ($method_name)
