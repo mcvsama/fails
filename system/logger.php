@@ -44,7 +44,7 @@ class Logger
 
 		# Write log message:
 		$ip = isset ($_SERVER['REMOTE_ADDR'])? $_SERVER['REMOTE_ADDR'] : Fails::$request->env['REMOTE_ADDR'];
-		fwrite ($f, "$datestr | $ip | <$class> $message\n");
+		fwrite ($f, "$datestr | $ip | $class | $message\n");
 
 		# Release lock:
 		flock ($f, LOCK_UN);
@@ -112,8 +112,10 @@ class Logger
 		$s .= "\n";
 		$s .= "---- Request dump ----\n";
 		# TODO Dump request: $request->inspect()
+		$s .= "TODO\n";
 		$s .= "---- Session dump ----\n";
 		# TODO Dump session: $session->inspect()
+		$s .= "TODO\n";
 
 		$this->fatal ($s);
 	}

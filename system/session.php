@@ -25,6 +25,14 @@ class Session implements ArrayAccess
 	}
 
 	/**
+	 * Returns session ID.
+	 */
+	public function id()
+	{
+		return session_id();
+	}
+
+	/**
 	 * Sets value in session.
 	 */
 	public function set ($key, $value)

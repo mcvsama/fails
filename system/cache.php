@@ -32,7 +32,7 @@ class Cache implements ArrayAccess
 	 */
 	public function offsetExists ($offset)
 	{
-		return file_exists ($this->prepare_offset ($offset));
+		return Fails::$config->fails->caching && file_exists ($this->prepare_offset ($offset));
 	}
 
 	/**

@@ -1,15 +1,29 @@
 <?php # vim: set fenc=utf8 ts=4 sw=4:
 
 ##
+## Root Fails exception
+##
+
+class FailsException extends Exception
+{
+	public function __construct ($message = null, $code = 0)
+	{
+		parent::__construct ($message, $code);
+		if (Fails::$logger)
+			Fails::$logger->exception ($this);
+	}
+}
+
+##
 ## General exceptions
 ##
 
-class ParserException extends Exception
+class ParserException extends FailsException
 {
 }
 
 
-class MethodMissingException extends Exception
+class MethodMissingException extends FailsException
 {
 	public function __construct ($name, $object)
 	{
@@ -18,22 +32,22 @@ class MethodMissingException extends Exception
 }
 
 
-class ArgumentException extends Exception
+class ArgumentException extends FailsException
 {
 }
 
 
-class UnimplementedException extends Exception
+class UnimplementedException extends FailsException
 {
 }
 
 
-class InvalidOperationException extends Exception
+class InvalidOperationException extends FailsException
 {
 }
 
 
-class StatusException extends Exception
+class StatusException extends FailsException
 {
 	public $status_code;
 	public $status_message;
@@ -51,7 +65,7 @@ class StatusException extends Exception
 ## Logger exceptions
 ##
 
-class LoggerException extends Exception
+class LoggerException extends FailsException
 {
 }
 
@@ -59,7 +73,7 @@ class LoggerException extends Exception
 ## Inflector exceptions
 ##
 
-class InflectorException extends Exception
+class InflectorException extends FailsException
 {
 }
 
@@ -67,7 +81,7 @@ class InflectorException extends Exception
 ## Response exceptions
 ##
 
-class ResponseException extends Exception
+class ResponseException extends FailsException
 {
 }
 
@@ -75,22 +89,22 @@ class ResponseException extends Exception
 ## Dispatcher exceptions
 ##
 
-class SecurityException extends Exception
+class SecurityException extends FailsException
 {
 }
 
 
-class RequireFileException extends Exception
+class RequireFileException extends FailsException
 {
 }
 
 
-class MissingControllerException extends Exception
+class MissingControllerException extends FailsException
 {
 }
 
 
-class MissingActionException extends Exception
+class MissingActionException extends FailsException
 {
 }
 
@@ -98,7 +112,7 @@ class MissingActionException extends Exception
 ## Controller exceptions
 ##
 
-class DoubleRenderException extends Exception
+class DoubleRenderException extends FailsException
 {
 	public function __construct()
 	{
@@ -110,12 +124,12 @@ class DoubleRenderException extends Exception
 ## Router exceptions
 ##
 
-class RouteGenerationException extends Exception
+class RouteGenerationException extends FailsException
 {
 }
 
 
-class DuplicateRouteException extends Exception
+class DuplicateRouteException extends FailsException
 {
 	public $name;
 
@@ -127,7 +141,7 @@ class DuplicateRouteException extends Exception
 }
 
 
-class RouteNotFoundException extends Exception
+class RouteNotFoundException extends FailsException
 {
 	public $url;
 
@@ -139,7 +153,7 @@ class RouteNotFoundException extends Exception
 }
 
 
-class RoutePathInvalidException extends Exception
+class RoutePathInvalidException extends FailsException
 {
 	public $route;
 
@@ -154,17 +168,17 @@ class RoutePathInvalidException extends Exception
 ## View exceptions
 ##
 
-class ViewMissingException extends Exception
+class ViewMissingException extends FailsException
 {
 }
 
 
-class ViewParserException extends Exception
+class ViewParserException extends FailsException
 {
 }
 
 
-class ViewEngineAlreadyRegisteredException extends Exception
+class ViewEngineAlreadyRegisteredException extends FailsException
 {
 	public $processor;
 
@@ -176,7 +190,7 @@ class ViewEngineAlreadyRegisteredException extends Exception
 }
 
 
-class ViewEngineMissingException extends Exception
+class ViewEngineMissingException extends FailsException
 {
 	public $identifier;
 
@@ -188,7 +202,7 @@ class ViewEngineMissingException extends Exception
 }
 
 
-class ViewConfigurationException extends Exception
+class ViewConfigurationException extends FailsException
 {
 }
 

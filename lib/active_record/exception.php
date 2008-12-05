@@ -1,6 +1,6 @@
 <?php # vim: set fenc=utf8 ts=4 sw=4:
 
-class ActiveRecordException extends Exception
+class ActiveRecordException extends FailsException
 {
 	public $record;
 

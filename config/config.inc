@@ -21,6 +21,8 @@ Fails::$config->fails->session->path = null;
 # Set session cookie 'secure' param:
 Fails::$config->fails->session->secure = false;
 
+# Enable/disable caching:
+Fails::$config->fails->caching = true;
 
 # Set following, if you don't want Fails to detect base-url automatically:
 Fails::$config->fails->base_url = null;
