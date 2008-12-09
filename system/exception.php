@@ -32,6 +32,15 @@ class MethodMissingException extends FailsException
 }
 
 
+class StaticMethodMissingException extends FailsException
+{
+	public function __construct ($name, $class_name)
+	{
+		parent::__construct ("missing method '$name' on class '".$class_name."'");
+	}
+}
+
+
 class ArgumentException extends FailsException
 {
 }

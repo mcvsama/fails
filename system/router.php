@@ -192,6 +192,13 @@ class Route
 		# Set for checking if parameter names in path do not repeat:
 		$uniq = array();
 
+		if (isset ($this->params['path_prefix']))
+		{
+			$seg = new stdclass();
+			$seg->type = 'string';
+			$seg->value = trim ($this->params['path_prefix'], '/ ');
+			$this->segments[] = $seg;
+		}
 		foreach (explode ('/', $this->path) as $s)
 		{
 			$seg = new stdclass();

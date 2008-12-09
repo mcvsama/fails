@@ -9,6 +9,9 @@ class Request
 	# Environment variables:
 	public $env;
 
+	# Cookies:
+	public $cookies;
+
 	# Privates:
 	private $route_string;
 	private $base_url;
@@ -21,12 +24,14 @@ class Request
 		$this->g = $_GET;
 		$this->p = $_POST;
 		$this->env = $_SERVER;
+		$this->cookies = $_COOKIE;
 
 		Fails::$logger->add (Logger::CLASS_INFO, 'Request '.$this->env['REQUEST_METHOD'].' '.$this->env['REQUEST_URI']);
 
 		unset ($_GET);
 		unset ($_POST);
 		unset ($_SERVER);
+		unset ($_COOKIE);
 
 		$this->setup_base_url();
 		$this->setup_route_string();

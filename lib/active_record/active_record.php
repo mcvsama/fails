@@ -19,22 +19,60 @@ class ActiveRecord implements ArrayAccess
 	# Internals object:
 	protected $_;
 
+	protected static $db;
+	protected static $relation_name;
+	protected static $relation_info;
+	protected static $attributes_info;
+	protected static $attributes_prototype;
+
+	/**
+	 * Initializes record.
+	 *
+	 * \param	db
+	 * 			Link to database. If null, and $this->database exists,
+	 * 			$this->database will be used as a name for named connection.
+	 *
+	 * \throws	RelationDoesNotExistException
+	 * 			When there is no relation corresponding to object's class name in database.
+	 */
+	public static function initialize ($class_name, Database $db = null)
+	{
+		self::$db = new ActiveRecordFinderBase();
+
+		# Database connection:
+		self::$db = $db;
+		if (self::$db === null)
+		{
+			$k = '';
+			if (isset (self::$database))
+				$k = self::$database;
+			if (!isset (Database::$connections[$k]))
+				throw new InvalidDatabaseConnectionNameException ("named database connection '{$k}' does not exist");
+			self::$db = Database::$connections[$k];
+		}
+
+		# Relation info:
+		self::$relation_name = Inflector::pluralize (Inflector::underscore ($class_name));
+		$db_dump = self::$db->dump_relations();
+		if (!isset ($db_dump[self::$relation_name]))
+			throw new RelationDoesNotExistException (null, "database says that relation '".self::$relation_name."' for model '".$class_name."' does not exist");
+		self::$relation_info = $db_dump[self::$relation_name];
+
+		# Attributes info and attributes array prototype:
+		self::$attributes_info = self::$db->dump_attributes_of (self::$relation_name);
+		self::$attributes_prototype = array();
+		foreach (self::$attributes_info as $att_name => $att_info)
+			self::$attributes_prototype[$att_name] = null;
+	}
+
 	/**
 	 * Creates new instance of singular (new) record.
 	 *
 	 * \param	attributes_map
 	 * 			Map of values that will be stored in record through setters.
 	 *
-	 * \param	db
-	 * 			Link to database. If null, and $this->database exists,
-	 * 			$this->database will be used as a name for named connection.
-	 *
 	 * \throws	InvalidDatabaseConnectionNameException
-	 * 			When $db is null and no connection named by $this->database
-	 * 			has been registered (or $this->database is missing).
-	 *
-	 * \throws	RelationDoesNotExistException
-	 * 			When there is no relation corresponding to object's class name in database.
+	 * 			When $db is null and no named connection is defined for record.
 	 *
 	 * \throws	InvalidAttributeNameException
 	 * 			When trying to set not existing (in relation) attribute.
@@ -47,32 +85,8 @@ class ActiveRecord implements ArrayAccess
 		$this->_ = new ActiveRecordBase();
 		$this->_->is_new = true;
 
-		# Database connection:
-		$this->_->db = $db;
-		if ($this->_->db === null)
-		{
-			$k = '';
-			if (isset ($this->_database))
-				$k = $this->_database;
-			if (!isset (Database::$connections[$k]))
-				throw new InvalidDatabaseConnectionNameException ("named database connection '{$k}' does not exist");
-			$this->_->db = Database::$connections[$k];
-		}
-
-		# Relation info:
-		$this->_->relation_name = Inflector::pluralize (Inflector::underscore (get_class ($this)));
-		$db_dump = $this->_->db->dump_relations();
-		if (!isset ($db_dump[$this->_->relation_name]))
-			throw new RelationDoesNotExistException ($this, "database says that relation '{$this->_->relation_name}' for model '".get_class ($this)."' does not exist");
-		$this->_->relation_info = $db_dump[$this->_->relation_name];
-
-		# Attributes:
-		$this->_->attributes_info = $this->_->db->dump_attributes_of ($this->_->relation_name);
-		$a = array();
-		foreach ($this->_->attributes_info as $att_name => $att_info)
-			$a[$att_name] = null;
-		$this->_->attributes = $a;
-		$this->_->original_attributes = $a;
+		$this->_->attributes = self::$attributes_prototype;
+		$this->_->original_attributes = self::$attributes_prototype;
 
 		# Initialize attributes:
 		if (is_array ($attributes_map))
@@ -157,14 +171,6 @@ class ActiveRecord implements ArrayAccess
 	##
 	## Normal methods
 	##
-
-	/**
-	 * Returns DB connection used by this model.
-	 */
-	public function connection()
-	{
-		# TODO
-	}
 
 	/**
 	 * Updates attributes, but only those which are present
@@ -273,7 +279,7 @@ class ActiveRecord implements ArrayAccess
 		# Validation:
 		$this->validate();
 		# Create SQL:
-		$relation = DatabaseQuery::e ($this->_->db->escape_relation_name ($this->_->relation_name));
+		$relation = DatabaseQuery::e (self::$db->escape_relation_name (self::$relation_name));
 		$n = 0;
 		$integers = $attributes = $values = array();
 		foreach ($this->_->attributes as $name => $value)
@@ -284,9 +290,9 @@ class ActiveRecord implements ArrayAccess
 				$values[] = $this[$name];
 			}
 		$sql = "INSERT INTO $relation (".join (', ', $attributes).") VALUES (:".join (', :', $integers).")";
-		$this->_->db->exec (new DatabaseQueryWithArray ($sql, $values));
+		self::$db->exec (new DatabaseQueryWithArray ($sql, $values));
 		# Get ID:
-		$this[ActiveRecord::PRIMARY_KEY] = $this->_->db->sequence_value ($this->_->relation_name, ActiveRecord::PRIMARY_KEY);
+		$this[ActiveRecord::PRIMARY_KEY] = self::$db->sequence_value (self::$relation_name, ActiveRecord::PRIMARY_KEY);
 		# Change state and backup attributes:
 		$this->_->is_new = false;
 		$this->_->original_attributes = $this->_->attributes;
@@ -315,7 +321,7 @@ class ActiveRecord implements ArrayAccess
 		# Validation:
 		$this->validate();
 		# Create SQL:
-		$relation = DatabaseQuery::e ($this->_->db->escape_relation_name ($this->_->relation_name));
+		$relation = DatabaseQuery::e (self::$db->escape_relation_name (self::$relation_name));
 		$n = 0;
 		$pairs = $attributes = $values = array();
 		foreach ($this->_->attributes as $name => $value)
@@ -326,7 +332,7 @@ class ActiveRecord implements ArrayAccess
 				$values[] = $this[$name];
 			}
 		$values[] = $this->id;
-		$this->_->db->exec (new DatabaseQueryWithArray ("UPDATE $relation SET ".join (', ', $pairs)." WHERE ".ActiveRecord::PRIMARY_KEY." = :".++$n, $values));
+		self::$db->exec (new DatabaseQueryWithArray ("UPDATE $relation SET ".join (', ', $pairs)." WHERE ".ActiveRecord::PRIMARY_KEY." = :".++$n, $values));
 		# Backup attributes:
 		$this->_->original_attributes = $this->_->attributes;
 		# For chaining:
@@ -419,6 +425,44 @@ class ActiveRecord implements ArrayAccess
 	}
 
 	##
+	## Static functions
+	##
+
+	/**
+	 * Returns DB connection used by this model.
+	 */
+	public static function db()
+	{
+		return self::$db;
+	}
+
+	/**
+	 * Returns relation name used in database (not escaped for SQL).
+	 */
+	public static function relation_name()
+	{
+		return self::$relation_name;
+	}
+
+	/**
+	 * Returns relation info dumped by database.
+	 */
+	public static function relation_info()
+	{
+		return self::$relation_info;
+	}
+
+	/**
+	 * Returns attributes info dumped by database.
+	 */
+	public static function attributes_info()
+	{
+		return self::$attributes_info;
+	}
+
+	public function relation_name()
+
+	##
 	## Privates
 	##
 
@@ -426,6 +470,78 @@ class ActiveRecord implements ArrayAccess
 	{
 		if (!array_key_exists ($name, $this->_->original_attributes))
 			throw new InvalidAttributeNameException ($this, $name);
+	}
+
+	##
+	## Finder methods
+	##
+
+	/**
+	 * Takes variable number of arguments either record IDs or one array containing record IDs.
+	 * If array is given function will return array (even if array contains one element).
+	 * If IDs are passed directly as arguments, array is returned only when there are 2 or more
+	 * arguments.
+	 *
+	 * Examples:
+	 *   find (3) -> Returns record with ID = 3
+	 *   find (array (3)) -> Returns array containing one record with ID = 3
+	 *   find (3, 4) or find (array (3, 4)) -> Returns array of records with IDs 3 and 4
+	 */
+	public static function find()
+	{
+		$ids = func_get_args();
+		if (is_array ($ids[0]))
+			$ids = $ids[0];
+		if (is_array ($ids[0]) && count ($ids) > 0)
+			throw new ArgumentException ("can't take mixed array/integers arguments");
+		# SQL:
+		$relation = DatabaseQuery::e (self::db()->escape_relation_name (self::relation_name()));
+		$r = self::db()->exec (new DatabaseQuery ("SELECT * FROM $relation WHERE ".ActiveRecord::PRIMARY_KEY." IN (:1)", $ids));
+	}
+
+	/**
+	 * \param	options
+	 * 			Map of options:
+	 * 				'select'		Selected columns, defaults to '<relation_name>.*'.
+	 * 				'conditions'	Conditions passed after WHERE clause. Can be array containing
+	 * 								string of conditions and list of parameters like
+	 * 								array ('username = :1 AND password = :2', $username, $password).
+	 * 				'limit'
+	 * 				'offset'
+	 * 				'order'
+	 */
+	public static function find_all (array $options = array())
+	{
+		# Example: User::find_all ('select' => 'username', 'conditions' => 'created_at < now()', 'order' => 'username DESC, created_at ASC');
+		User::find_all_by_
+		# TODO
+	}
+
+	public static function find_first (array $options = array())
+	{
+		# TODO
+	}
+
+	/**
+	 * Dynamic calling is stupid in one way, that is it fails to search
+	 * by attributes containing string '_any_' in their name because '_and_'
+	 * is used as a attribute name separator (in function's name).
+	 * You'll have to use generic ActiveRecordFinder::find_first or ::find_all method.
+	 */
+	public static function __call ($name, $arguments)
+	{
+		if (preg_match ('/^find_(first|all)_by_(.+)$/', $name, $matches))
+		{
+			$count = $matches[1];
+			$atts = explode ('_and_', $matches[2]);
+			Fails::$logger->debug ('finding by '.implode (' and ', $atts));
+			# TODO
+			if ($count == 'all')
+				return array();
+			return null;
+		}
+		else
+			throw new MethodMissingException ($name, $this);
 	}
 }
 

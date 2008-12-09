@@ -193,7 +193,7 @@ class Controller implements DynamicMethod, CallCatcher
 	protected function render_template ($template_name, $layout = null, $status = null)
 	{
 		$factory = $this->get_viewer_factory();
-		$file_name = FAILS_ROOT.'/app/views/'.$template_name.'.'.$factory->extension();
+		$file_name = Fails::$dispatcher->application_root().'/views/'.$template_name.'.'.$factory->extension();
 		return $this->render_file ($file_name, $layout, $status);
 	}
 

@@ -3,10 +3,11 @@
 class Logger
 {
 	private $file_name;
+	private $muted;
 
 	const CLASS_DEBUG	= 'debug';
-	const CLASS_INFO	= 'info ';
-	const CLASS_WARN	= 'warn ';
+	const CLASS_INFO	= 'info';
+	const CLASS_WARN	= 'warn';
 	const CLASS_ERROR	= 'error';
 	const CLASS_FATAL	= 'fatal';
 
@@ -20,6 +21,22 @@ class Logger
 	}
 
 	/**
+	 * Mutes logger.
+	 */
+	public function mute()
+	{
+		$this->muted = true;
+	}
+
+	/**
+	 * Unmutes logger.
+	 */
+	public function unmute()
+	{
+		$this->muted = false;
+	}
+
+	/**
 	 * \param	class
 	 * 			Message class. See CLASS_ constants.
 	 * \param	message
@@ -27,6 +44,12 @@ class Logger
 	 */
 	public function add ($class, $message)
 	{
+		if ($this->muted)
+			return;
+
+		if (!in_array ($class, Fails::$config->fails->logger->classes))
+			return;
+
 		$utime = explode (' ', microtime());
 		$usec = ltrim ($utime[0], '0');
 		$datestr = date ('D d.m.Y H:i:s');
@@ -44,7 +67,7 @@ class Logger
 
 		# Write log message:
 		$ip = isset ($_SERVER['REMOTE_ADDR'])? $_SERVER['REMOTE_ADDR'] : Fails::$request->env['REMOTE_ADDR'];
-		fwrite ($f, "$datestr | $ip | $class | $message\n");
+		fwrite ($f, "$datestr | $ip | ".str_pad ($class, 5)." | $message\n");
 
 		# Release lock:
 		flock ($f, LOCK_UN);
@@ -106,7 +129,7 @@ class Logger
 	{
 		assert ($e instanceof Exception);
 
-		$s = 'Exception: '.$e->getMessage()."\n";
+		$s = 'Exception '.get_class ($e).': '.$e->getMessage()."\n";
 		$s .= "---- Backtrace ----\n";
 		$s .= $e->getTraceAsString();
 		$s .= "\n";

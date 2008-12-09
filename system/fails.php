@@ -88,6 +88,17 @@ class Fails
 			throw new RequireFileException ("couldn't load file '".basename ($file_name)."'");
 		Fails::protect_code ('?>'.$c.'<?php ');
 	}
+
+	/**
+	 * Loads helper file from app/helpers.
+	 *
+	 * \param	helper_name
+	 * 			Helper name like 'application'. Then function tries to load file named 'application_helper.php'.
+	 */
+	public static function load_helper ($helper_name)
+	{
+		Fails::require_file (Fails::$dispatcher->application_root().'/helpers/'.$helper_name.'_helper.php');
+	}
 }
 
 ?>

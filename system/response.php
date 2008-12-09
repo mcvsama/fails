@@ -64,6 +64,14 @@ class Response
 	}
 
 	/**
+	 * Sets cookie.
+	 */
+	public function set_cookie ($name, $value, $expire = null, $path = null, $domain = null, $secure = null, $httponly = null)
+	{
+		setcookie ($name, $value, $expire, $path, $domain, $secure, $httponly);
+	}
+
+	/**
 	 * Sets response content.
 	 */
 	public function set_body ($body)

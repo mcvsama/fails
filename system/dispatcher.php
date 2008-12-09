@@ -11,7 +11,8 @@ class Dispatcher
 	public $router;
 	public $cache;
 
-	# Controller and action names:
+	# Application, controller and action names:
+	public $application_name;
 	public $controller_name;
 	public $action_name;
 
@@ -61,6 +62,14 @@ class Dispatcher
 			return Fails::$controller->call ($name, $arguments);
 
 		throw new MethodMissingException ($name, $this);
+	}
+
+	/**
+	 * Returns application's root directory name.
+	 */
+	public function application_root()
+	{
+		return FAILS_ROOT.'/app'.($this->application_name ? ":".$this->application_name : '');
 	}
 
 	##
@@ -174,8 +183,9 @@ class Dispatcher
 
 		# Controller/action names:
 		$this->merged_params = array_merge ($this->current_route->get_params(), $this->request->g, $this->request->p);
-		$this->controller_name = $this->merged_params['controller'];
-		$this->action_name = $this->merged_params['action'];
+		$this->application_name = @$this->merged_params['application'];
+		$this->controller_name = @$this->merged_params['controller'];
+		$this->action_name = @$this->merged_params['action'];
 
 		# Load controller file:
 		Fails::$controller = $this->controller = $this->load_controller();
@@ -194,13 +204,13 @@ class Dispatcher
 	 */
 	private function load_controller()
 	{
-		$b = FAILS_ROOT.'/app/controllers/';
+		$b = $this->application_root().'/controllers/';
 		$f = realpath ($b.$this->controller_name.'_controller.php');
 		# Throw exception if $controller_name pointed out of controllers directory:
 		if (strpos ($f, $b) !== 0)
 			throw new MissingControllerException ("couldn't find controller '{$this->controller_name}'");
 		# ApplicationController:
-		$this->require_file (FAILS_ROOT.'/app/controllers/application_controller.php');
+		$this->require_file ($this->application_root().'/controllers/application_controller.php');
 		# Load file if everything seems OK:
 		$this->require_file ($f);
 		# Controller:
