@@ -115,6 +115,16 @@ class Router implements DynamicMethod, CallCatcher
 	}
 
 	/**
+	 * \returns	value returned by Route::generate_path().
+	 */
+	public function generate_path ($name, array $params = array())
+	{
+		if (!array_key_exists ($name, $this->routes_by_name))
+			throw new RouteGenerationException ("couldn't find route with name '$name'");
+		return $this->routes_by_name[$name]->generate_path ($params);
+	}
+
+	/**
 	 * \returns URL for given parameters.
 	 *			To use when no named route is defined.
 	 *
@@ -135,7 +145,7 @@ class Router implements DynamicMethod, CallCatcher
 
 	public function can_call ($name, $arguments)
 	{
-		if (preg_match ('/^(.+)_url$/', $name, $out))
+		if (preg_match ('/^(.+)(?:_url|_path)$/', $name, $out))
 			return isset ($this->routes_by_name[$out[1]]);
 		return false;
 	}
@@ -144,6 +154,8 @@ class Router implements DynamicMethod, CallCatcher
 	{
 		if (preg_match ('/^(.+)_url$/', $method, $out))
 			return $this->generate_url ($out[1], coalesce (@$arguments[0], array()));
+		if (preg_match ('/^(.+)_path$/', $method, $out))
+			return $this->generate_path ($out[1], coalesce (@$arguments[0], array()));
 		throw new MethodMissingException ($method, $this);
 	}
 
@@ -281,9 +293,17 @@ class Route
 	}
 
 	/**
-	 * Generates URL for direct use in view.
+	 * Generates absolute URL for direct use in view. It includes full server name and protocol name.
 	 */
 	public function generate_url (array $params = array())
+	{
+		return Fails::$request->fully_qualified_base_url().$this->generate_path ($params);
+	}
+
+	/**
+	 * Generates local, relative URL (a path) for use in view.
+	 */
+	public function generate_path (array $params = array())
 	{
 		$missing_parameters = array();
 		$used_parameters = array();
@@ -317,7 +337,7 @@ class Route
 				$z[] = urlencode ($par_name).'='.urlencode ($params[$par_name]);
 			$s .= implode ('&', $z);
 		}
-		return Fails::$request->fully_qualified_base_url().$s;
+		return $s;
 	}
 
 	##

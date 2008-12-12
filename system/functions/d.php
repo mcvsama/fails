@@ -6,13 +6,17 @@
  * \param	object
  * 			Object to dump.
  */
-function d ($object)
+function d()
 {
-	echo '<pre>';
-	ob_start();
-	var_dump ($object);
-	echo h (ob_get_clean());
-	echo '</pre>';
+	$args = func_get_args();
+	foreach ($args as $arg)
+	{
+		echo '<pre>';
+		ob_start();
+		var_dump ($arg);
+		echo h (ob_get_clean());
+		echo '</pre>';
+	}
 }
 
 ?>

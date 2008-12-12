@@ -193,6 +193,14 @@ class Request
 		return $this->is_async();
 	}
 
+	/**
+	 * Returns referer.
+	 */
+	public function referer()
+	{
+		return $this->env['HTTP_REFERER'];
+	}
+
 	##
 	## Privates
 	##

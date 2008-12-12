@@ -145,6 +145,16 @@ class ActiveRecord implements ArrayAccess
 		return $this[$name];
 	}
 
+	public function __isset ($name)
+	{
+		# TODO
+	}
+
+	public function __unset ($name)
+	{
+		# TODO ?
+	}
+
 	/**
 	 * Implements:
 	 * 	$ar->attribute_changed()
@@ -470,6 +480,13 @@ class ActiveRecord implements ArrayAccess
 	{
 		if (!array_key_exists ($name, $this->_->original_attributes))
 			throw new InvalidAttributeNameException ($this, $name);
+	}
+
+	private function get_serializers()
+	{
+		# TODO coś w ten deseń:
+		# $cv = get_class_vars (get_class ($this));
+		# return coalesce ($cv['serializes'], array());
 	}
 
 	##

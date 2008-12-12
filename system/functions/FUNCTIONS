@@ -4,6 +4,7 @@ cdata_escape
 coalesce
 d
 h
+html_attributes_from
 is_blank
 j
 t

@@ -66,12 +66,12 @@ class Fails
 	 * \throws	RequireFileException
 	 * 			On first file from list that could not be loaded.
 	 */
-	public static function require_files_from_list ($file_name)
+	public static function require_files_from_list ($file_name, $protect = true)
 	{
 		$directory = dirname ($file_name);
 		foreach (file ($file_name) as $line)
 			if (($stripped = trim ($line)) !== '')
-				Fails::require_file (rtrim ($directory, '/').'/'.$stripped.'.php');
+				Fails::require_file (rtrim ($directory, '/').'/'.$stripped.'.php', $protect);
 	}
 
 	/**
@@ -82,11 +82,16 @@ class Fails
 	 * \throws	ParserException
 	 * 			When loaded file has syntax errors.
 	 */
-	public static function require_file ($file_name)
+	public static function require_file ($file_name, $protect = true)
 	{
-		if (($c = @file_get_contents ($file_name)) === false)
-			throw new RequireFileException ("couldn't load file '".basename ($file_name)."'");
-		Fails::protect_code ('?>'.$c.'<?php ');
+		if ($protect)
+		{
+			if (($c = @file_get_contents ($file_name)) === false)
+				throw new RequireFileException ("couldn't load file '".basename ($file_name)."'");
+			Fails::protect_code ('?>'.$c.'<?php ');
+		}
+		else
+			require $file_name;
 	}
 
 	/**

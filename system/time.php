@@ -1,6 +1,6 @@
 <?php # vim: set fenc=utf8 ts=4 sw=4:
 
-class Time
+class Time implements Marshal
 {
 	private $stamp;
 	private $timezone;
@@ -107,6 +107,18 @@ class Time
 		$t = new Time();
 		$t->set_from_string ($string);
 		return $t;
+	}
+
+	public static function dump ($object)
+	{
+		if (!($object instanceof Time))
+			throw new ArgumentException ('Time::dump: expected object of type Time');
+		return date ('c', $object->stamp);
+	}
+
+	public static function restore ($string)
+	{
+		return Time::from_iso ($string);
 	}
 }
 

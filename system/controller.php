@@ -14,14 +14,14 @@ class Controller implements DynamicMethod, CallCatcher
 	# Merged params from GET/POST and Router:
 	public $params;
 
+	# Map of named blocks for views (keys 'action' and 'layout' are used by Fails):
+	public $content_for;
+
 	# Object holding variables meant to be passed to view:
 	protected $set;
 
 	# Factories creating Viewers:
 	private $factories;
-
-	# Map of named blocks of views:
-	private $content_for;
 
 	# Identifier of engine to use:
 	private $current_factory;
