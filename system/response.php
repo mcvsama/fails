@@ -88,16 +88,16 @@ class Response
 	}
 
 	/**
-	 * \param	route
+	 * \param	url
 	 * 			URL to redirect to.
 	 * 			If relative URL is given, it is relative to base-url of framework installation.
 	 */
-	public function redirect_to ($route)
+	public function redirect_to ($url)
 	{
-		if ($route === null)
+		if ($url === null)
 			$this->redirection = null;
 		else
-			$this->redirection = $route;
+			$this->redirection = $url;
 	}
 
 	/**
@@ -106,6 +106,18 @@ class Response
 	public function reload()
 	{
 		$this->redirect_to (Fails::$request->url());
+	}
+
+	/**
+	 * Redirects to Referer or throws exception when Referer
+	 * is not set.
+	 */
+	public function redirect_back()
+	{
+		$referer = Fails::$request->referer();
+		if ($referer === null)
+			throw new RedirectException ("couldn't redirect to referer: referer not sent by browser");
+		$this->redirect_to ($referer);
 	}
 
 	/**

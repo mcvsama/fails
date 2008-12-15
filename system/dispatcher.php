@@ -31,9 +31,7 @@ class Dispatcher
 			$this->load_system_files();
 			$this->check_config();
 			$this->prepare_environment();
-			$this->setup_error_handling();
-			$this->load_libraries();
-			$this->call_action();
+			$this->answer();
 		}
 		catch (Exception $e)
 		{
@@ -70,6 +68,16 @@ class Dispatcher
 	public function application_root()
 	{
 		return FAILS_ROOT.'/app'.($this->application_name ? ":".$this->application_name : '');
+	}
+
+	/**
+	 * Renders file relative to Fails' public directory with given status.
+	 */
+	public function render_public ($file_name, $status)
+	{
+		header ('HTTP/1.1 '.$status);
+		header ('Content-Type: text/html; charset=UTF-8');
+		echo file_get_contents (FAILS_ROOT.'/public/'.$file_name);
 	}
 
 	##
@@ -181,14 +189,37 @@ class Dispatcher
 		$this->require_file (FAILS_ROOT.'/config/routes.inc');
 		$this->current_route = $this->router->get_route_for ($this->request->route_string());
 
-		# Controller/action names:
+		# Merged params:
 		$this->merged_params = array_merge ($this->current_route->get_params(), $this->request->g, $this->request->p);
-		$this->application_name = @$this->merged_params['application'];
-		$this->controller_name = @$this->merged_params['controller'];
-		$this->action_name = @$this->merged_params['action'];
+	}
 
-		# Load controller file:
-		Fails::$controller = $this->controller = $this->load_controller();
+	/**
+	 * Checks route type and answers with action or with redirection.
+	 */
+	private function answer()
+	{
+		# Check whether to call application/controller/action or to redirect?
+		if ($this->current_route instanceof ActionRoute)
+		{
+			# Controller/action names:
+			$this->application_name = @$this->merged_params['application'];
+			$this->controller_name = @$this->merged_params['controller'];
+			$this->action_name = @$this->merged_params['action'];
+
+			# Load controller file:
+			Fails::$controller = $this->controller = $this->load_controller();
+
+			$this->setup_error_handling();
+			$this->load_libraries();
+			$this->call_action();
+		}
+		else if ($this->current_route instanceof RedirectRoute)
+		{
+			# Redirect to given route:
+			$this->response->set_status ($this->current_route->http_status_code, $this->current_route->http_status_message);
+			$this->response->redirect_to ($this->current_route->get_answer_location());
+			$this->response->answer();
+		}
 	}
 
 	/**
@@ -311,31 +342,13 @@ class Dispatcher
 		else
 		{
 			if ($e instanceof RouteNotFoundException || ($e instanceof StatusException && $e->status_code == 404))
-			{
-				$s = '404 Not found';
-				$f = FAILS_ROOT.'/public/'.Fails::$config->fails->error_404_file;
-			}
+				$this->render_public (Fails::$config->fails->error_404_file, '404 Not found');
 			else if ($e instanceof StatusException && $e->status_code == 403)
-			{
-				$s = '403 Forbidden';
-				$f = FAILS_ROOT.'/public/'.Fails::$config->fails->error_403_file;
-			}
+				$this->render_public (Fails::$config->fails->error_403_file, '403 Forbidden');
 			else if ($e instanceof StatusException && $e->status_code == 422)
-			{
-				$s = '422 Unprocessable Entity';
-				$f = FAILS_ROOT.'/public/'.Fails::$config->fails->error_422_file;
-			}
+				$this->render_public (Fails::$config->fails->error_422_file, '422 Unprocessable entity');
 			else
-			{
-				$s = '500 Internal server error';
-				$f = FAILS_ROOT.'/public/'.Fails::$config->fails->error_500_file;
-			}
-
-			header ('HTTP/1.1 '.$s);
-			header ('Content-Type: text/html; charset=UTF-8');
-
-			# File existence has been asserted in check_config().
-			echo file_get_contents ($f);
+				$this->render_public (Fails::$config->fails->error_500_file, '500 Internal server error');
 		}
 	}
 

@@ -94,6 +94,11 @@ class ResponseException extends FailsException
 {
 }
 
+
+class RedirectException extends ResponseException
+{
+}
+
 ##
 ## Dispatcher exceptions
 ##

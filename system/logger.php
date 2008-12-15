@@ -67,7 +67,7 @@ class Logger
 
 		# Write log message:
 		$ip = isset ($_SERVER['REMOTE_ADDR'])? $_SERVER['REMOTE_ADDR'] : Fails::$request->env['REMOTE_ADDR'];
-		fwrite ($f, "$datestr | $ip | ".str_pad ($class, 5)." | $message\n");
+		fwrite ($f, "$datestr | ".str_pad ($ip, 15)." | ".str_pad ($class, 5)." | $message\n");
 
 		# Release lock:
 		flock ($f, LOCK_UN);

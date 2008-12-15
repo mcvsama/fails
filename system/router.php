@@ -29,9 +29,8 @@ class Router implements DynamicMethod, CallCatcher
 	 * \param	path
 	 * 			User-Agent URL path, ie path visible to the user in URL input.
 	 * 			Can contain parameters leaded with ':', ie. 'albums/:album_nr'.
-	 * 			Some parameters may have special meaning for Fails, ie. 'controller' and
-	 * 			'action' will be used by dispatcher to find proper controller and method to
-	 * 			execute.
+	 * 			Some parameters may have special meaning for Fails, ie. 'application', 'controller' and
+	 * 			'action' will be used by dispatcher to find proper application, controller and method to execute.
 	 * 			Note: characters allowed for parameter name in path are [-_0-9a-zA-Z].
 	 * \param	params
 	 * 			Map of default values for params. Keys must not contain leading ':'.
@@ -56,9 +55,36 @@ class Router implements DynamicMethod, CallCatcher
 	{
 		if ($name !== null && array_key_exists ($name, $this->routes_by_name))
 			throw new DuplicateRouteException ($name);
-		$route = new Route ($name, $path, array_merge ($this->current_default_params(), $params));
+		$route = new ActionRoute ($name, $path, array_merge ($this->current_default_params(), $params));
 		$this->routes[] = $route;
 		$this->routes_by_name[$name] = $route;
+	}
+
+	/**
+	 * Responds to client with temporary redirect request (HTTP 302 Found).
+	 *
+	 * \param	target
+	 * 			Name of target route.
+	 * \param	path
+	 *			See description for Router#connect.
+	 * \param	params
+	 * 			See description for Router#connect.
+	 */
+	public function temporary_redirect ($target, $path, array $params = array())
+	{
+		$route = new RedirectRoute (302, 'Found', $target, $path, array_merge ($this->current_default_params(), $params));
+		$this->routes[] = $route;
+	}
+
+	/**
+	 * Responds to client with permanent redirect request (HTTP 301 Moved permanently).
+	 *
+	 * Parameters have the same meaning as in Router#temporary_redirect.
+	 */
+	public function permanent_redirect ($target, $path, array $params = array())
+	{
+		$route = new RedirectRoute (301, 'Moved permanently', $target, $path, array_merge ($this->current_default_params(), $params));
+		$this->routes[] = $route;
 	}
 
 	/**
@@ -84,6 +110,14 @@ class Router implements DynamicMethod, CallCatcher
 		if (!$x)
 			$x = array();
 		return $x;
+	}
+
+	/**
+	 * Returns named Route object by given name.
+	 */
+	public function get_route_by_name ($name)
+	{
+		return $this->routes_by_name[$name];
 	}
 
 	/**
@@ -191,7 +225,7 @@ class Route
 	 * \throws	RoutePathInvalidException
 	 * 			When given route path has invalid format.
 	 */
-	public function __construct ($name, $path, array $params = null)
+	public function __construct ($name, $path, array $params = array())
 	{
 		$this->name = $name;
 		$this->path = trim ($path, '/ ');
@@ -326,7 +360,7 @@ class Route
 		}
 		# If there are missing parameters:
 		if (count ($missing_parameters))
-			throw new RouteGenerationException ("couldn't generate url from route '{$this->name}': missing parameters: ".implode (', ', $missing_parameters));
+			throw new RouteGenerationException ("couldn't generate url from ".($this->name? "route '{$this->name}'" : "anonymous route").": missing parameters: ".implode (', ', $missing_parameters));
 		# Additional parameters:
 		$additional_params = array_diff (array_keys ($params), $used_parameters);
 		if (count ($additional_params))
@@ -360,6 +394,45 @@ class Route
 			else								throw new Exception ("router: internal error: unexpected segment of type '{$seg->type}'");
 		}
 		return $re;
+	}
+}
+
+
+class ActionRoute extends Route
+{
+	# All methods implemented in Route.
+}
+
+
+class RedirectRoute extends Route
+{
+	public $http_status_code;
+	public $http_status_message;
+
+	private $target;
+
+	public function __construct ($http_status_code, $http_status_message, $target, $path, array $params = array())
+	{
+		parent::__construct (null, $path, $params);
+		$this->http_status_code = intval ($http_status_code);
+		$this->http_status_message = $http_status_message;
+		$this->target = $target;
+	}
+
+	public function get_answer_location()
+	{
+		if (Fails::$router === null)
+			throw new RouteGenerationException ("can't generate redirect route: Fails' router not yet initialized");
+		$special_params = array ('application' => null, 'controller' => null, 'action' => null);
+		$params = array_diff_key ($this->get_params(), $special_params);
+		return $this->get_target_route()->generate_url ($params);
+	}
+
+	public function get_target_route()
+	{
+		if (Fails::$router === null)
+			throw new RouteGenerationException ("can't generate redirect route: Fails' router not yet initialized");
+		return Fails::$router->get_route_by_name ($this->target);
 	}
 }
 
