@@ -23,6 +23,20 @@ class Cache implements ArrayAccess
 		$this->params = array();
 	}
 
+	/**
+	 * Returns time (Time) when object has been added to cache.
+	 * Returns null if there is no such object in cache.
+	 */
+	public function timestamp ($offset)
+	{
+		if (!Fails::$config->fails->caching)
+			return null;
+		$t = filemtime ($this->prepare_offset ($offset));
+		if ($t === null)
+			return null;
+		return Time::from_unix ($t);
+	}
+
 	##
 	## ArrayAccess
 	##
@@ -40,7 +54,12 @@ class Cache implements ArrayAccess
 	 */
 	public function offsetGet ($offset)
 	{
-		return file_get_contents ($this->prepare_offset ($offset));
+		if (!Fails::$config->fails->caching)
+			return null;
+		$r = file_get_contents ($this->prepare_offset ($offset));
+		if ($r === false)
+			return null;
+		return $r;
 	}
 
 	/**
@@ -48,7 +67,9 @@ class Cache implements ArrayAccess
 	 */
 	public function offsetSet ($offset, $value)
 	{
-		return file_put_contents ($this->prepare_offset ($offset), $value);
+		if (Fails::$config->fails->caching)
+			return file_put_contents ($this->prepare_offset ($offset), $value);
+		return $value;
 	}
 
 	/**
@@ -72,10 +93,10 @@ class Cache implements ArrayAccess
 	 */
 	private function stringify_params()
 	{
-		$v = array();
+		$a = array();
 		foreach ($this->params as $k => $v)
-			$v[] = urlencode ($k).'='.urlencode ($v);
-		return join (':', $v);
+			$a[] = urlencode ($k).'='.urlencode ($v);
+		return join (';', $a);
 	}
 }
 

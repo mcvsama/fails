@@ -52,7 +52,7 @@ class Logger
 
 		$utime = explode (' ', microtime());
 		$usec = ltrim ($utime[0], '0');
-		$datestr = date ('D d.m.Y H:i:s');
+		$datestr = date ('Y-m-d H:i:s');
 		$datestrusec = $datestr.$usec.date ('O');
 
 		# Open log file for appending:
@@ -127,20 +127,18 @@ class Logger
 	 */
 	public function exception ($e)
 	{
-		assert ($e instanceof Exception);
-
-		$s = 'Exception '.get_class ($e).': '.$e->getMessage()."\n";
-		$s .= "---- Backtrace ----\n";
-		$s .= $e->getTraceAsString();
-		$s .= "\n";
-		$s .= "---- Request dump ----\n";
-		# TODO Dump request: $request->inspect()
-		$s .= "TODO\n";
-		$s .= "---- Session dump ----\n";
-		# TODO Dump session: $session->inspect()
-		$s .= "TODO\n";
-
-		$this->fatal ($s);
+		$s = 'Exception '.get_class ($e).': '.capitalize ($e->getMessage())."\n";
+		$s .= "——— Stack trace ———\n";
+		$s .= $e->getTraceAsString()."\n";
+		foreach (Fails::get_state() as $h => $c)
+		{
+			$s .= "——— $h ———\n";
+			$s .= "$c\n";
+		}
+		if ($e instanceof LoggerException)
+			error_log ($s);
+		else
+			$this->fatal ($s);
 	}
 }
 

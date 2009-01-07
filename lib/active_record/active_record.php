@@ -37,8 +37,6 @@ class ActiveRecord implements ArrayAccess
 	 */
 	public static function initialize ($class_name, Database $db = null)
 	{
-		self::$db = new ActiveRecordFinderBase();
-
 		# Database connection:
 		self::$db = $db;
 		if (self::$db === null)
@@ -530,7 +528,7 @@ class ActiveRecord implements ArrayAccess
 	public static function find_all (array $options = array())
 	{
 		# Example: User::find_all ('select' => 'username', 'conditions' => 'created_at < now()', 'order' => 'username DESC, created_at ASC');
-		User::find_all_by_
+		#User::find_all_by_
 		# TODO
 	}
 

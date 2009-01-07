@@ -61,7 +61,12 @@ class Time implements Marshal
 
 	public function to_iso()
 	{
-		return strftime ('%Y-%m-%d %R:%M', $this->stamp);
+		return strftime ('%Y-%m-%d %T', $this->stamp);
+	}
+
+	public function to_atom()
+	{
+		return strftime ('%Y-%m-%dT%TZ', $this->stamp);
 	}
 
 	public function to_http()

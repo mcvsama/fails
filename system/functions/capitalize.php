@@ -8,6 +8,8 @@
  */
 function capitalize ($string)
 {
+	if (!$string)
+		return '';
 	$string[0] = strtoupper ($string[0]);
 	return $string;
 }

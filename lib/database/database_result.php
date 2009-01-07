@@ -138,7 +138,7 @@ abstract class DatabaseResult implements ArrayAccess, Countable, Iterator
 	}
 
 	##
-	## Iterator
+	## Iterator, Countable
 	##
 
 	public function current()

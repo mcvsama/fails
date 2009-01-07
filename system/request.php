@@ -26,7 +26,7 @@ class Request
 		$this->env = $_SERVER;
 		$this->cookies = $_COOKIE;
 
-		Fails::$logger->add (Logger::CLASS_INFO, 'Request '.$this->env['REQUEST_METHOD'].' '.$this->env['REQUEST_URI']);
+		Fails::$logger->add (Logger::CLASS_INFO, 'Request '.$this->env['REQUEST_METHOD'].' '.$this->request_uri());
 
 		unset ($_GET);
 		unset ($_POST);
@@ -46,6 +46,14 @@ class Request
 	}
 
 	/**
+	 * Returns request-uri, ie full path and query-string.
+	 */
+	public function request_uri()
+	{
+		return $this->env['REQUEST_URI'];
+	}
+
+	/**
 	 * Returns requested route string, without query parameters (those after '?')
 	 * and without base-url.
 	 */
@@ -59,9 +67,7 @@ class Request
 	 */
 	public function url()
 	{
-		if ($qs = $this->query_string())
-			$qs = '?'.$qs;
-		return $this->fully_qualified_base_url().'/'.$this->route_string().$qs;
+		return $this->fully_qualified_base_url().$this->request_uri();
 	}
 
 	/**
@@ -178,19 +184,12 @@ class Request
 
 	/**
 	 * Returns true if request contains header X-Requested-With with value 'XMLHttpRequest'.
-	 * Useful for asynchronous request made with PrototypeJS.org.
-	 */
-	public function is_async()
-	{
-		return @$this->env['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest';
-	}
-
-	/**
-	 * Synonym to is_async.
+	 * Useful for asynchronous request made with PrototypeJS.org, or other JS libraries
+	 * adding such header to XHRs.
 	 */
 	public function is_xhr()
 	{
-		return $this->is_async();
+		return @$this->env['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest';
 	}
 
 	/**
@@ -216,7 +215,7 @@ class Request
 		{
 			# Base URL is common leading part of REQUEST_URI and SCRIPT_NAME variables.
 			$this->base_url = '';
-			$u = $this->env['REQUEST_URI'];
+			$u = $this->request_uri();
 			$s = dirname ($this->env['SCRIPT_NAME']);
 			for ($i = 0; $i < strlen ($u); ++$i)
 			{
@@ -234,7 +233,7 @@ class Request
 	private function setup_route_string()
 	{
 		$regex = preg_quote ($this->base_url(), '/').'([^\?]*)(\?.*)?';
-		preg_match ('/^'.$regex.'$/', $this->env['REQUEST_URI'], $out);
+		preg_match ('/^'.$regex.'$/', $this->request_uri(), $out);
 		# Extract route string from REQUEST_URI:
 		$this->route_string = @trim (urldecode ($out[1]), '/');
 	}

@@ -117,6 +117,8 @@ class Response
 		$referer = Fails::$request->referer();
 		if ($referer === null)
 			throw new RedirectException ("couldn't redirect to referer: referer not sent by browser");
+		if ($referer == Fails::$request->url())
+			throw new RedirectException ("couldn't redirect to the same action: would cause infinite redirect loop");
 		$this->redirect_to ($referer);
 	}
 
