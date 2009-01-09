@@ -18,6 +18,8 @@ class Response
 		$this->set_status (200, 'OK');
 		$this->redirect_to (null);
 		$this->headers = array();
+		$this->headers['Expires'] = null;
+		$this->headers['Vary'] = '*';
 	}
 
 	/**
@@ -159,23 +161,16 @@ class Response
 				$this->body = '';
 			}
 		}
-		# Caching:
-		if (Fails::$config->fails->prevent_caching === false)
-		{
-			$this->headers['Cache-Control'] = '';
-			$this->headers['Pragma'] = '';
-		}
 		# Content-Type:
-		header ('Content-Type: '.$this->content_type);
-		# Headers:
-		foreach ($this->headers as $header_name => $content)
-			header ($header_name.': '.$content);
+		$this->headers['Content-Type'] = $this->content_type;
 		# Redirection:
 		if ($this->is_redirected())
 		{
 			$r = $this->fully_qualified_redirection_url();
-			header ('Location: '.$r);
+			header ('HTTP/1.1 303 See other');
+			$this->headers['Location'] = $r;
 			Fails::$logger->add (Logger::CLASS_INFO, 'Redirection to '.$r);
+			Fails::$config->fails->prevent_caching = true;
 		}
 		else
 		{
@@ -183,6 +178,15 @@ class Response
 			header ('HTTP/1.1 '.$r);
 			Fails::$logger->add (Logger::CLASS_INFO, 'Response <'.$this->content_type.'> '.$r);
 		}
+		# No caching?
+		if (Fails::$config->fails->prevent_caching === false)
+		{
+			$this->headers['Cache-Control'] = '';
+			$this->headers['Pragma'] = '';
+		}
+		# Headers:
+		foreach ($this->headers as $header_name => $content)
+			header ($header_name.': '.$content);
 		# Enable output compression? Careful not to compress two times, when it's enabled in php.ini:
 		$compression = Fails::$config->fails->output_compression && !ini_get('zlib.output_compression');
 		if ($compression)
