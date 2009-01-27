@@ -372,7 +372,7 @@ class Route
 					$z[] = urlencode ($par_name).'='.urlencode ($params[$par_name]);
 			$s .= implode ('&', $z);
 		}
-		return $s.'#'.array_to_string ($params);
+		return $s;
 	}
 
 	##
