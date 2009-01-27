@@ -365,12 +365,12 @@ class Route
 		$additional_params = array_diff (array_keys ($params), $used_parameters);
 		if (count ($additional_params))
 		{
-			$s .= '?';
 			$z = array();
 			foreach ($additional_params as $par_name)
 				if ($params[$par_name] !== $this->params[$par_name])
 					$z[] = urlencode ($par_name).'='.urlencode ($params[$par_name]);
-			$s .= implode ('&', $z);
+			if (count ($z))
+				$s .= '?'.implode ('&', $z);
 		}
 		return $s;
 	}
