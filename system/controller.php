@@ -210,13 +210,39 @@ class Controller implements DynamicMethod, CallCatcher
 	{
 		if ($this->response->is_redirected())
 			throw new DoubleRenderException();
-		Fails::$logger->add (Logger::CLASS_INFO, "Rendering file: $file_name");
+		Fails::$logger->info ("Rendering file: $file_name");
 		# Load template file:
 		$content = @file_get_contents ($file_name);
 		if ($content === false)
 			throw new ViewMissingException ("View template missing: '".$file_name."'");
 		$processor = $this->get_processor ($content, $this->get_variables_for_view());
 		return $this->render_text ($processor->process(), $layout, $status);
+	}
+
+	/**
+	 * \param	partial_name
+	 * 			Name of partial. If no '/' is inside partial_name, name is relative to current templates directory.
+	 * \param	locals
+	 * 			Local variables for partial.
+	 * \param	options
+	 * 			Now unused.
+	 *
+	 * \throws	ViewMissingException
+	 * 			When given template file can't be found or loaded.
+	 */
+	public function render_partial ($partial_name, array $locals = array(), array $options = array())
+	{
+		$factory = $this->get_viewer_factory();
+		Fails::$logger->info ('Rendering partial: '.$partial_name);
+		$locals = array_merge ($this->get_variables_for_view(), $locals);
+		if (strpos ($partial_name, '/') === false)
+			$partial_name = Fails::$dispatcher->controller_name.'/'.$partial_name;
+		$partial_name = Fails::$dispatcher->application_root().'/views/'.$partial_name.'.'.$factory->extension();
+		$content = @file_get_contents ($partial_name);
+		if ($content === false)
+			throw new ViewMissingException ("View partial missing: '".$file_name."'");
+		$processor = $this->get_processor ($content, $locals);
+		return $processor->process();
 	}
 
 	/**

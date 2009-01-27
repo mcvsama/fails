@@ -167,7 +167,7 @@ class Response
 		if ($this->is_redirected())
 		{
 			$r = $this->fully_qualified_redirection_url();
-			header ('HTTP/1.1 303 See other');
+			header ('HTTP/1.1 302 Found');
 			$this->headers['Location'] = $r;
 			Fails::$logger->add (Logger::CLASS_INFO, 'Redirection to '.$r);
 			Fails::$config->fails->prevent_caching = true;

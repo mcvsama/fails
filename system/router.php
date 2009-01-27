@@ -368,10 +368,11 @@ class Route
 			$s .= '?';
 			$z = array();
 			foreach ($additional_params as $par_name)
-				$z[] = urlencode ($par_name).'='.urlencode ($params[$par_name]);
+				if ($params[$par_name] !== $this->params[$par_name])
+					$z[] = urlencode ($par_name).'='.urlencode ($params[$par_name]);
 			$s .= implode ('&', $z);
 		}
-		return $s;
+		return $s.'#'.array_to_string ($params);
 	}
 
 	##
