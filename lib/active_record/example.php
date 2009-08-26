@@ -34,6 +34,16 @@ class Example extends ActiveRecord
 	);
 }
 
+# TODO for testing, to remove:
+class User extends ActiveRecord
+{
+	public function validation ($errors)
+	{
+		$errors->validate_as_nonblank ('username');
+		$errors->validate_as_nonblank ('password');
+	}
+}
+
 # Belongs-to
 # ——————————
 #

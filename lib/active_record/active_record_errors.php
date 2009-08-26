@@ -21,6 +21,18 @@ class ActiveRecordErrors
 		return count ($this->list) > 0;
 	}
 
+	public function clear()
+	{
+		$this->list = array();
+	}
+
+	public function validate_presence_of ($field_name, $message = null)
+	{
+		if ($this->get_data_for ($field_name) === null)
+			return $this->add ($field_name, coalesce ($message, 'is required'));
+		return true;
+	}
+
 	public function validate_uniqueness_of ($field_name, $message = null)
 	{
 		# TODO zapytać bazę trzeba
@@ -29,8 +41,6 @@ class ActiveRecordErrors
 	public function validate_length_of ($field_name, $min_length, $max_length, $message = null)
 	{
 		$len = strlen ($this->get_data_for ($field_name));
-		$min_length = intval ($min_length);
-		$max_length = intval ($max_length);
 		# Prepare message:
 		if ($message === null)
 		{
@@ -311,4 +321,3 @@ class ActiveRecordErrors
 	}
 }
 
-?>

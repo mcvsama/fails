@@ -80,6 +80,16 @@ class Dispatcher
 		echo file_get_contents (FAILS_ROOT.'/public/'.$file_name);
 	}
 
+	/**
+	 * Renders given text with given status.
+	 */
+	public function render_text ($text, $status)
+	{
+		header ('HTTP/1.1 '.$status);
+		header ('Content-Type: text/html; charset=UTF-8');
+		echo $text;
+	}
+
 	##
 	## Privates
 	##
@@ -341,14 +351,28 @@ class Dispatcher
 		}
 		else
 		{
-			if ($e instanceof RouteNotFoundException || ($e instanceof StatusException && $e->status_code == 404))
-				$this->render_public (Fails::$config->fails->error_404_file, '404 Not found');
-			else if ($e instanceof StatusException && $e->status_code == 403)
-				$this->render_public (Fails::$config->fails->error_403_file, '403 Forbidden');
-			else if ($e instanceof StatusException && $e->status_code == 422)
-				$this->render_public (Fails::$config->fails->error_422_file, '422 Unprocessable entity');
+			if ($this->request->is_xhr())
+			{
+				if ($e instanceof RouteNotFoundException || ($e instanceof StatusException && $e->status_code == 404))
+					$this->render_text ('404 Not found', '404 Not found');
+				else if ($e instanceof StatusException && $e->status_code == 403)
+					$this->render_text ('403 Forbidden', '403 Forbidden');
+				else if ($e instanceof StatusException && $e->status_code == 422)
+					$this->render_text ('422 Unprocessable entity', '422 Unprocessable entity');
+				else
+					$this->render_text ('500 Internal server error', '500 Internal server error');
+			}
 			else
-				$this->render_public (Fails::$config->fails->error_500_file, '500 Internal server error');
+			{
+				if ($e instanceof RouteNotFoundException || ($e instanceof StatusException && $e->status_code == 404))
+					$this->render_public (Fails::$config->fails->error_404_file, '404 Not found');
+				else if ($e instanceof StatusException && $e->status_code == 403)
+					$this->render_public (Fails::$config->fails->error_403_file, '403 Forbidden');
+				else if ($e instanceof StatusException && $e->status_code == 422)
+					$this->render_public (Fails::$config->fails->error_422_file, '422 Unprocessable entity');
+				else
+					$this->render_public (Fails::$config->fails->error_500_file, '500 Internal server error');
+			}
 		}
 	}
 

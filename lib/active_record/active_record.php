@@ -3,6 +3,7 @@
 require 'exception.php';
 require 'active_record_base.php';
 require 'active_record_errors.php';
+require 'active_record_finder.php';
 
 # TODO przeanalizuj zwykłe metody: http://api.rubyonrails.org/classes/ActiveRecord/Base.html
 # TODO przeanalizuj związki: http://api.rubyonrails.org/classes/ActiveRecord/Associations/ClassMethods.html
@@ -24,6 +25,7 @@ class ActiveRecord implements ArrayAccess
 	protected static $relation_info;
 	protected static $attributes_info;
 	protected static $attributes_prototype;
+	protected static $finder;
 
 	/**
 	 * Initializes record.
@@ -61,6 +63,9 @@ class ActiveRecord implements ArrayAccess
 		self::$attributes_prototype = array();
 		foreach (self::$attributes_info as $att_name => $att_info)
 			self::$attributes_prototype[$att_name] = null;
+
+		# Finder:
+		self::$finder = new ActiveRecordFinder (...);
 	}
 
 	/**
@@ -468,8 +473,6 @@ class ActiveRecord implements ArrayAccess
 		return self::$attributes_info;
 	}
 
-	public function relation_name()
-
 	##
 	## Privates
 	##
@@ -539,11 +542,11 @@ class ActiveRecord implements ArrayAccess
 
 	/**
 	 * Dynamic calling is stupid in one way, that is it fails to search
-	 * by attributes containing string '_any_' in their name because '_and_'
+	 * by attributes containing string '_and_' in their name because '_and_'
 	 * is used as a attribute name separator (in function's name).
 	 * You'll have to use generic ActiveRecordFinder::find_first or ::find_all method.
 	 */
-	public static function __call ($name, $arguments)
+	public static function __callStatic ($name, $arguments)
 	{
 		if (preg_match ('/^find_(first|all)_by_(.+)$/', $name, $matches))
 		{
@@ -560,14 +563,3 @@ class ActiveRecord implements ArrayAccess
 	}
 }
 
-# TODO for testing, to remove:
-class User extends ActiveRecord
-{
-	public function validation ($errors)
-	{
-		$errors->validate_as_nonblank ('username');
-		$errors->validate_as_nonblank ('password');
-	}
-}
-
-?>

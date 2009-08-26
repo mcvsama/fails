@@ -8,4 +8,3 @@ class ActiveRecordBase
 	public $errors;
 }
 
-?>
