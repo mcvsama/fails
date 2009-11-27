@@ -155,7 +155,7 @@ class Dispatcher
 		# PHP config
 		#
 
-		set_magic_quotes_runtime (0);
+		# Deprecated: set_magic_quotes_runtime (0);
 		ini_set ('arg_separator.output', '&amp;');
 		ini_set ('display_errors', Fails::$config->fails->display_errors? 1 : 0);
 		ini_set ('log_errors', 1);

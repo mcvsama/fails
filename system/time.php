@@ -5,7 +5,7 @@ class Time implements Marshal
 	private $stamp;
 	private $timezone;
 
-	public function __construct ($arg)
+	public function __construct ($arg = 0)
 	{
 		switch (true)
 		{

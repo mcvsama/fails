@@ -4,4 +4,3 @@ fails_viewer
 database
 database_postgresql
 database_selector
-active_record

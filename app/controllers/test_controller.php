@@ -9,16 +9,16 @@ class TestController extends ApplicationController
 		$this->response->set_content_type ('text/html; charset=UTF-8');
 #		$q = new DatabaseQuery ('SELECT * FROM users WHERE username != :0 AND id IN (:1)', 'user', array (1, 2, 5, 12));
 		$this->set->connection = $this->db;
-		$this->render_text ($this->params['a']['b']);
+		$this->render_text ($this->params['id'].'---'.$this->index_url (array ('id' => 'http://łączka')));
 		try {
-			$u = new User();
-			$u->username = '';
-			$u->password = 'dupa';
-			$u->save();
+#			$u = new User();
+#			$u->username = '';
+#			$u->password = 'dupa';
+#			$u->save();
 		}
 		catch (ActiveRecordInvalidException $e)
 		{
-			var_dump ($e->record->errors()->list);
+#			var_dump ($e->record->errors()->list);
 		}
 #		list ($a, $b) = $this->params ('a', 'b', 'z');
 	}
